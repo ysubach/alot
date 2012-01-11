@@ -1,0 +1,113 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>install &mdash; Alot User Manual</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.21',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body">
+            
+  <div class="section" id="install">
+<h1>install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h1>
+<p>Alot depends on recent versions of notmuch (&gt;=0.10) and urwid (&gt;=1.0). Note that due to restrictions
+on argparse and subprocess, you need to run <em>python v&gt;=2.7</em>, which only recently made it
+into debian testing.</p>
+<div class="section" id="urwid">
+<h2>urwid<a class="headerlink" href="#urwid" title="Permalink to this headline">¶</a></h2>
+<p>make sure you have urwid v &gt;=1.0. It is available on debian (wheezy)
+and in <a href="#id1"><span class="problematic" id="id2">*</span></a>buntu 12.04. To install from git use:</p>
+<blockquote>
+<div>git clone <a class="reference external" href="http://github.com/wardi/urwid">http://github.com/wardi/urwid</a>
+cd urwid
+sudo python setup.py install</div></blockquote>
+<p>It seems you need the python headers for this. On debian/ubuntu:</p>
+<blockquote>
+<div>aptitude install python2.7-dev</div></blockquote>
+</div>
+<div class="section" id="notmuch">
+<h2>notmuch<a class="headerlink" href="#notmuch" title="Permalink to this headline">¶</a></h2>
+<p>install notmuch <em>and</em> python bindings from git:</p>
+<blockquote>
+<div><p>git clone git://notmuchmail.org/git/notmuch</p>
+<p>cd notmuch
+./configure
+make
+sudo make install
+cd bindings/python
+python setup.py install &#8211;user</p>
+</div></blockquote>
+</div>
+<div class="section" id="alot">
+<h2>alot<a class="headerlink" href="#alot" title="Permalink to this headline">¶</a></h2>
+<p>get alot and install it from git:</p>
+<blockquote>
+<div>git clone git://github.com/pazz/alot alot
+cd alot
+python setup.py install &#8211;user
+make sure <cite>~/.local/bin</cite> is in your path.</div></blockquote>
+</div>
+<div class="section" id="other-dependencies">
+<h2>other dependencies<a class="headerlink" href="#other-dependencies" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul>
+<li><p class="first">python bindings to libmagic, greater or equal than v5.04:
+<a class="reference external" href="http://darwinsys.com/file/">http://darwinsys.com/file/</a>
+This is packaged as &#8216;python-magic&#8217; in debian/ubuntu.</p>
+</li>
+<li><p class="first">a mailcap file (I recommend installing &#8216;mime-support&#8217; on debian/ubuntu).
+This is used to determine the commands to call when opening attachments
+or text-rendering parts that are not plaintext, e.g. text/html.
+Make sure you have a inline renderer for text/html set as otherwise
+html mails will not display:</p>
+<blockquote>
+<div><p>#~/.mailcap, take w3m for example:
+text/html;  w3m -dump %s; nametemplate=%s.html; copiousoutput</p>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<p>All other configs are optional, but if you want to send mails you need to specify at least one
+account section in your config:</p>
+<blockquote>
+<div>[account uoe]
+realname = Your Name
+address = <a class="reference external" href="mailto:your&#37;&#52;&#48;address">your<span>&#64;</span>address</a></div></blockquote>
+<p>See <cite>CUSTOMIZE.md</cite> on how to do fancy customization.</p>
+</div>
+</div>
+
+
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="index.html">Alot User Manual</a> &raquo;</li>
+      </ul>
+    </div>
+  </body>
+</html>
