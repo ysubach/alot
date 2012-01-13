@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Configuration &mdash; Alot User Manual</title>
+    <title>2. Configuration &mdash; Alot User Manual</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -27,7 +27,7 @@
           <div class="body">
             
   <div class="section" id="configuration">
-<h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
+<h1>2. Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
 <p>All configs are optional, but if you want to send mails you need to
 specify at least one account section.</p>
 <p>Alot reads a config file in the &#8220;INI&#8221; syntax:
@@ -55,7 +55,7 @@ displaying tags. utf-8 symbols welcome.</dd>
 <dd>define colour palette for colour mode. X is in {1, 16, 256}.</dd>
 </dl>
 <div class="section" id="accounts">
-<h2>Accounts<a class="headerlink" href="#accounts" title="Permalink to this headline">¶</a></h2>
+<h2>2.1. Accounts<a class="headerlink" href="#accounts" title="Permalink to this headline">¶</a></h2>
 <p>A sample gmail section looks like this (provided you have configured msmtp accordingly):</p>
 <div class="highlight-python"><pre>[account gmail]
 realname = Patrick Totzke
@@ -113,7 +113,7 @@ You can tune this using the <cite>abook_regexp</cite> option (beware Commandpars
 Have a look at the FAQ for other examples.</p>
 </div>
 <div class="section" id="key-bindings">
-<h2>Key Bindings<a class="headerlink" href="#key-bindings" title="Permalink to this headline">¶</a></h2>
+<h2>2.2. Key Bindings<a class="headerlink" href="#key-bindings" title="Permalink to this headline">¶</a></h2>
 <p>If you want to bind a commandline to a key you can do so by adding the pair to the
 <cite>[MODE-maps]</cite> config section, where MODE is the buffer mode you want the binding to hold.
 Consider the following lines, which allow you to send mails in envelope buffers using the
@@ -134,7 +134,7 @@ ctrl s = send</pre>
 <p>Have a look at <a class="reference external" href="http://excess.org/urwid/wiki/UserInput">the urwid User Input documentation</a> on how key strings are formated.</p>
 </div>
 <div class="section" id="hooks">
-<h2>Hooks<a class="headerlink" href="#hooks" title="Permalink to this headline">¶</a></h2>
+<h2>2.3. Hooks<a class="headerlink" href="#hooks" title="Permalink to this headline">¶</a></h2>
 <p>Hooks are python callables that live in a module specified by
 <cite>hooksfile</cite> in the <cite>[global]</cite> section of your config. Per default this points
 to <cite>~/.config/alot/hooks.py</cite>.
@@ -180,7 +180,7 @@ Receives and returns a string.</dd>
 </dl>
 </div>
 <div class="section" id="widget-colours">
-<h2>Widget Colours<a class="headerlink" href="#widget-colours" title="Permalink to this headline">¶</a></h2>
+<h2>2.4. Widget Colours<a class="headerlink" href="#widget-colours" title="Permalink to this headline">¶</a></h2>
 <p>Alot can be run in 1, 16 or 256 colour mode.
 The requested mode is determined by the commandline parameter <cite>-C</cite> or read from
 option <cite>colourmode</cite> in section <cite>[globals]</cite> of your config file.
@@ -207,7 +207,7 @@ on the interpreted values. Urwid provides a <a class="reference external" href="
 colours easy.</p>
 </div>
 <div class="section" id="custom-tagstring-formatting">
-<h2>Custom Tagstring Formatting<a class="headerlink" href="#custom-tagstring-formatting" title="Permalink to this headline">¶</a></h2>
+<h2>2.5. Custom Tagstring Formatting<a class="headerlink" href="#custom-tagstring-formatting" title="Permalink to this headline">¶</a></h2>
 <p>In theme sections you can use keys with prefix <cite>tag_</cite> to format specific tagstrings. For instance,
 the following will make alot display the &#8220;todo&#8221; tag in white on red when in 256c-mode.</p>
 <div class="highlight-python"><pre>[256c-theme]
@@ -226,7 +226,7 @@ replied = ⇄</pre>
 </div>
 </div>
 <div class="section" id="highlighting-search-results">
-<h2>Highlighting Search Results<a class="headerlink" href="#highlighting-search-results" title="Permalink to this headline">¶</a></h2>
+<h2>2.6. Highlighting Search Results<a class="headerlink" href="#highlighting-search-results" title="Permalink to this headline">¶</a></h2>
 <p>Thread lines in the <tt class="docutils literal"><span class="pre">SearchBuffer</span></tt> can be highlighted by applying a theme different
 from their regular one if they match a <cite>notmuch</cite> query.</p>
 <p>The default config predefines highlighting for threads that carry the <cite>unread</cite>,
@@ -253,7 +253,7 @@ list of highlightable components:</p>
 </pre></div>
 </div>
 <div class="section" id="rules">
-<h3>Rules<a class="headerlink" href="#rules" title="Permalink to this headline">¶</a></h3>
+<h3>2.6.1. Rules<a class="headerlink" href="#rules" title="Permalink to this headline">¶</a></h3>
 <p>To specify which threads should be highlighted, you need to define highlighting
 rules. Rules map queries onto theme identifiers. Each thread that matches a given rule
 will use a theme identified by the ID the rule is mapped to.</p>
@@ -302,7 +302,7 @@ are hard to satisfy show up early in the dict:</p>
 highlighted as <cite>isunread</cite> only.</p>
 </div>
 <div class="section" id="theme-generic-components">
-<h3>Theme Generic Components<a class="headerlink" href="#theme-generic-components" title="Permalink to this headline">¶</a></h3>
+<h3>2.6.2. Theme Generic Components<a class="headerlink" href="#theme-generic-components" title="Permalink to this headline">¶</a></h3>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">The following schema will allow you to define highlighting themes for all
@@ -342,7 +342,7 @@ the <cite>subject</cite> of threads tagged as <cite>important</cite> that are cu
 matching a different query, and all other components except <cite>tags</cite>.</p>
 </div>
 <div class="section" id="theme-tags-component">
-<h3>Theme <cite>Tags</cite> Component<a class="headerlink" href="#theme-tags-component" title="Permalink to this headline">¶</a></h3>
+<h3>2.6.3. Theme <cite>Tags</cite> Component<a class="headerlink" href="#theme-tags-component" title="Permalink to this headline">¶</a></h3>
 <p>As described in <a class="reference internal" href="#custom-tagstring-formatting">Custom Tagstring Formatting</a>, tags may be themed individually.
 Highlighting expands this concept by allowing default themed tags as well as
 individual themed tags to provide highlighting variants.</p>
@@ -394,7 +394,7 @@ highlighting theme.</p>
 </div>
 </div>
 <div class="section" id="contacts-completion">
-<h2>Contacts Completion<a class="headerlink" href="#contacts-completion" title="Permalink to this headline">¶</a></h2>
+<h2>2.7. Contacts Completion<a class="headerlink" href="#contacts-completion" title="Permalink to this headline">¶</a></h2>
 <p>In each <cite>account</cite> section you can specify a <cite>abook_command</cite> that
 is considered the address book of that account and will be used
 for address completion where appropriate.</p>
@@ -439,7 +439,7 @@ abook_regexp = \"(?P&lt;name&gt;.+)\"\s*&lt;(?P&lt;email&gt;.*.+?@.+?)&gt;</pre>
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="usage.html" title="Usage"
+          <a href="usage/index.html" title="1. Usage"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">Alot User Manual</a> &raquo;</li>
       </ul>

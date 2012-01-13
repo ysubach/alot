@@ -1,0 +1,615 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>search-mode &mdash; Alot User Manual</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.21',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script> 
+  </head>
+  <body>  
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body">
+            
+  <div class="section" id="search-mode">
+<h1>search-mode<a class="headerlink" href="#search-mode" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="sort">
+<h2>sort<a class="headerlink" href="#sort" title="Permalink to this headline">¶</a></h2>
+<p>refine the querystring of this buffer</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>sort order. valid choices are: `oldest_first`,`newest_first`,`message_id`,`unsorted`.</dd>
+</dl>
+</div>
+<div class="section" id="untag">
+<h2>untag<a class="headerlink" href="#untag" title="Permalink to this headline">¶</a></h2>
+<p>remove tags from all messages in the thread</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>comma separated list of tags</dd>
+</dl>
+</div>
+<div class="section" id="retag">
+<h2>retag<a class="headerlink" href="#retag" title="Permalink to this headline">¶</a></h2>
+<p>set tags of all messages in the thread</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>comma separated list of tags</dd>
+</dl>
+</div>
+<div class="section" id="refineprompt">
+<h2>refineprompt<a class="headerlink" href="#refineprompt" title="Permalink to this headline">¶</a></h2>
+<p>prompt to change this buffers querystring</p>
+</div>
+<div class="section" id="tag">
+<h2>tag<a class="headerlink" href="#tag" title="Permalink to this headline">¶</a></h2>
+<p>add tags to all messages in the thread</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>comma separated list of tags</dd>
+</dl>
+</div>
+<div class="section" id="refine">
+<h2>refine<a class="headerlink" href="#refine" title="Permalink to this headline">¶</a></h2>
+<p>refine the querystring of this buffer</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>search string</dd>
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;sort:</th><td class="field-body">sort order. Valid choices are: `oldest_first`,`newest_first`,`message_id`,`unsorted`.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="retagprompt">
+<h2>retagprompt<a class="headerlink" href="#retagprompt" title="Permalink to this headline">¶</a></h2>
+<p>prompt to retag selected threads&#8217; tags</p>
+</div>
+<div class="section" id="toggletags">
+<h2>toggletags<a class="headerlink" href="#toggletags" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>flip presence of tags on this thread.</dt>
+<dd>A tag is considered present if at least one message contained in this
+thread is tagged with it. In that case this command will remove the tag
+from every message in the thread.</dd>
+<dt>argument</dt>
+<dd>comma separated list of tags</dd>
+</dl>
+</div>
+<div class="section" id="select">
+<h2>select<a class="headerlink" href="#select" title="Permalink to this headline">¶</a></h2>
+<p>open thread in a new buffer</p>
+</div>
+</div>
+<div class="section" id="thread-mode">
+<h1>thread-mode<a class="headerlink" href="#thread-mode" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="pipeto">
+<h2>pipeto<a class="headerlink" href="#pipeto" title="Permalink to this headline">¶</a></h2>
+<p>pipe message(s) to stdin of a shellcommand</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>shellcommand to pipe to</dd>
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;all:</th><td class="field-body">pass all messages.</td>
+</tr>
+<tr class="field"><th class="field-name">&#8212;format:</th><td class="field-body">output format. Valid choices are: `raw`,`decoded`,`id`,`filepath` (Defaults to: &#8216;raw&#8217;).</td>
+</tr>
+<tr class="field"><th class="field-name">&#8212;separately:</th><td class="field-body">call command once for each message.</td>
+</tr>
+<tr class="field"><th class="field-name">&#8212;background:</th><td class="field-body">disable stdin and ignore stdout.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="editnew">
+<h2>editnew<a class="headerlink" href="#editnew" title="Permalink to this headline">¶</a></h2>
+<p>edit message in as new</p>
+</div>
+<div class="section" id="toggleheaders">
+<h2>toggleheaders<a class="headerlink" href="#toggleheaders" title="Permalink to this headline">¶</a></h2>
+<p>display all headers</p>
+<dl class="docutils">
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;all:</th><td class="field-body">affect all messages.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="print">
+<h2>print<a class="headerlink" href="#print" title="Permalink to this headline">¶</a></h2>
+<p>print message(s)</p>
+<dl class="docutils">
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;all:</th><td class="field-body">print all messages.</td>
+</tr>
+<tr class="field"><th class="field-name">&#8212;raw:</th><td class="field-body">pass raw mail string.</td>
+</tr>
+<tr class="field"><th class="field-name">&#8212;separately:</th><td class="field-body">call print command once for each message.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="remove">
+<h2>remove<a class="headerlink" href="#remove" title="Permalink to this headline">¶</a></h2>
+<p>remove message(s) from the index</p>
+<dl class="docutils">
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;all:</th><td class="field-body">remove whole thread.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="togglesource">
+<h2>togglesource<a class="headerlink" href="#togglesource" title="Permalink to this headline">¶</a></h2>
+<p>display message source</p>
+<dl class="docutils">
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;all:</th><td class="field-body">affect all messages.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="id1">
+<h2>retag<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>set message(s) tags.</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>comma separated list of tags</dd>
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;all:</th><td class="field-body">tag all messages in thread.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="fold">
+<h2>fold<a class="headerlink" href="#fold" title="Permalink to this headline">¶</a></h2>
+<p>fold message(s)</p>
+<dl class="docutils">
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;all:</th><td class="field-body">fold all messages.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="id2">
+<h2>tag<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>add tags to message(s)</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>comma separated list of tags</dd>
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;all:</th><td class="field-body">tag all messages in thread.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="id3">
+<h2>untag<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>remove tags from message(s)</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>comma separated list of tags</dd>
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;all:</th><td class="field-body">tag all messages in thread.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="unfold">
+<h2>unfold<a class="headerlink" href="#unfold" title="Permalink to this headline">¶</a></h2>
+<p>unfold message(s)</p>
+<dl class="docutils">
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;all:</th><td class="field-body">unfold all messages.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="forward">
+<h2>forward<a class="headerlink" href="#forward" title="Permalink to this headline">¶</a></h2>
+<p>forward message</p>
+<dl class="docutils">
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;attach:</th><td class="field-body">attach original mail.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="reply">
+<h2>reply<a class="headerlink" href="#reply" title="Permalink to this headline">¶</a></h2>
+<p>reply to message</p>
+<dl class="docutils">
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;all:</th><td class="field-body">reply to all.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="save">
+<h2>save<a class="headerlink" href="#save" title="Permalink to this headline">¶</a></h2>
+<p>save attachment(s)</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>path to save to</dd>
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;all:</th><td class="field-body">save all attachments.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="id4">
+<h2>toggletags<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p>flip presence of tags on message(s)</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>comma separated list of tags</dd>
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;all:</th><td class="field-body">tag all messages in thread.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="id5">
+<h2>select<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>select focussed element. The fired action depends on the focus:</dt>
+<dd><ul class="first last simple">
+<li>if message summary, this toggles visibility of the message,</li>
+<li>if attachment line, this opens the attachment</li>
+</ul>
+</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="global-mode">
+<h1>global-mode<a class="headerlink" href="#global-mode" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="bclose">
+<h2>bclose<a class="headerlink" href="#bclose" title="Permalink to this headline">¶</a></h2>
+<p>close current buffer</p>
+</div>
+<div class="section" id="bprevious">
+<h2>bprevious<a class="headerlink" href="#bprevious" title="Permalink to this headline">¶</a></h2>
+<p>focus previous buffer</p>
+</div>
+<div class="section" id="search">
+<h2>search<a class="headerlink" href="#search" title="Permalink to this headline">¶</a></h2>
+<p>open a new search buffer</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>search string</dd>
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;sort:</th><td class="field-body">sort order. Valid choices are: `oldest_first`,`newest_first`,`message_id`,`unsorted`.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="compose">
+<h2>compose<a class="headerlink" href="#compose" title="Permalink to this headline">¶</a></h2>
+<p>compose a new email</p>
+<dl class="docutils">
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;sender:</th><td class="field-body">sender.</td>
+</tr>
+<tr class="field"><th class="field-name">&#8212;template:</th><td class="field-body">path to a template message file.</td>
+</tr>
+<tr class="field"><th class="field-name">&#8212;subject:</th><td class="field-body">subject line.</td>
+</tr>
+<tr class="field"><th class="field-name">&#8212;to:</th><td class="field-body">recipients.</td>
+</tr>
+<tr class="field"><th class="field-name">&#8212;cc:</th><td class="field-body">copy to.</td>
+</tr>
+<tr class="field"><th class="field-name">&#8212;bcc:</th><td class="field-body">blind copy to.</td>
+</tr>
+<tr class="field"><th class="field-name">&#8212;attach:</th><td class="field-body">attach files.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="prompt">
+<h2>prompt<a class="headerlink" href="#prompt" title="Permalink to this headline">¶</a></h2>
+<p>prompts for commandline and interprets it upon select</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>initial content</dd>
+</dl>
+</div>
+<div class="section" id="help">
+<h2>help<a class="headerlink" href="#help" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>display help for a command. Use &#8216;bindings&#8217; to
+display all keybings interpreted in current mode.&#8217;</div></blockquote>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>command or &#8216;bindings&#8217;</dd>
+</dl>
+</div>
+<div class="section" id="move">
+<h2>move<a class="headerlink" href="#move" title="Permalink to this headline">¶</a></h2>
+<p>move focus</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>direction</dd>
+</dl>
+</div>
+<div class="section" id="shellescape">
+<h2>shellescape<a class="headerlink" href="#shellescape" title="Permalink to this headline">¶</a></h2>
+<p>run external command</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>command line to execute</dd>
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;spawn:</th><td class="field-body">run in terminal window.</td>
+</tr>
+<tr class="field"><th class="field-name">&#8212;thread:</th><td class="field-body">run in separate thread.</td>
+</tr>
+<tr class="field"><th class="field-name">&#8212;refocus:</th><td class="field-body">refocus current buffer                      after command has finished.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="refresh">
+<h2>refresh<a class="headerlink" href="#refresh" title="Permalink to this headline">¶</a></h2>
+<p>refresh the current buffer</p>
+</div>
+<div class="section" id="cancel">
+<h2>cancel<a class="headerlink" href="#cancel" title="Permalink to this headline">¶</a></h2>
+<p>send cancel event</p>
+</div>
+<div class="section" id="pyshell">
+<h2>pyshell<a class="headerlink" href="#pyshell" title="Permalink to this headline">¶</a></h2>
+<p>open an interactive python shell for introspection</p>
+</div>
+<div class="section" id="exit">
+<h2>exit<a class="headerlink" href="#exit" title="Permalink to this headline">¶</a></h2>
+<p>shut down cleanly</p>
+</div>
+<div class="section" id="flush">
+<h2>flush<a class="headerlink" href="#flush" title="Permalink to this headline">¶</a></h2>
+<p>flush write operations or retry until committed</p>
+</div>
+<div class="section" id="bufferlist">
+<h2>bufferlist<a class="headerlink" href="#bufferlist" title="Permalink to this headline">¶</a></h2>
+<p>open a list of active buffers</p>
+</div>
+<div class="section" id="bnext">
+<h2>bnext<a class="headerlink" href="#bnext" title="Permalink to this headline">¶</a></h2>
+<p>focus next buffer</p>
+</div>
+<div class="section" id="id6">
+<h2>select<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<p>send select event</p>
+</div>
+<div class="section" id="taglist">
+<h2>taglist<a class="headerlink" href="#taglist" title="Permalink to this headline">¶</a></h2>
+<p>opens taglist buffer</p>
+</div>
+</div>
+<div class="section" id="envelope-mode">
+<h1>envelope-mode<a class="headerlink" href="#envelope-mode" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="set">
+<h2>set<a class="headerlink" href="#set" title="Permalink to this headline">¶</a></h2>
+<p>set header value</p>
+<dl class="docutils">
+<dt>positional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">0:</th><td class="field-body">header to refine</td>
+</tr>
+<tr class="field"><th class="field-name">1:</th><td class="field-body">value</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>optional arguments</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">&#8212;append:</th><td class="field-body">keep previous values.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div>
+<div class="section" id="id7">
+<h2>toggleheaders<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<p>toggle display of all headers</p>
+</div>
+<div class="section" id="edit">
+<h2>edit<a class="headerlink" href="#edit" title="Permalink to this headline">¶</a></h2>
+<p>edit mail</p>
+</div>
+<div class="section" id="send">
+<h2>send<a class="headerlink" href="#send" title="Permalink to this headline">¶</a></h2>
+<p>send mail</p>
+</div>
+<div class="section" id="attach">
+<h2>attach<a class="headerlink" href="#attach" title="Permalink to this headline">¶</a></h2>
+<p>attach files to the mail</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>file(s) to attach (accepts wildcads)</dd>
+</dl>
+</div>
+<div class="section" id="id8">
+<h2>refine<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<p>prompt to change the value of a header</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>header to refine</dd>
+</dl>
+</div>
+<div class="section" id="id9">
+<h2>save<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<p>save draft</p>
+</div>
+<div class="section" id="unset">
+<h2>unset<a class="headerlink" href="#unset" title="Permalink to this headline">¶</a></h2>
+<p>remove header field</p>
+<dl class="docutils">
+<dt>argument</dt>
+<dd>header to refine</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="bufferlist-mode">
+<h1>bufferlist-mode<a class="headerlink" href="#bufferlist-mode" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="close">
+<h2>close<a class="headerlink" href="#close" title="Permalink to this headline">¶</a></h2>
+<p>close focussed buffer</p>
+</div>
+<div class="section" id="id10">
+<h2>select<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
+<p>focus selected buffer</p>
+</div>
+</div>
+<div class="section" id="taglist-mode">
+<h1>taglist-mode<a class="headerlink" href="#taglist-mode" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id11">
+<h2>select<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<p>search for messages with selected tag</p>
+</div>
+</div>
+
+
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">Alot User Manual</a> &raquo;</li>
+      </ul>
+    </div>
+  </body>
+</html>
