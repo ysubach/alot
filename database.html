@@ -1,0 +1,946 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Email Database &mdash; alot v0.2-324-g5224 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.2-324-g5224',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="alot v0.2-324-g5224 documentation" href="index.html" />
+    <link rel="next" title="User Interface" href="interface.html" />
+    <link rel="prev" title="alot Developer Manual" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="interface.html" title="User Interface"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="alot Developer Manual"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">alot v0.2-324-g5224 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-alot.db">
+<span id="email-database"></span><h1>Email Database<a class="headerlink" href="#module-alot.db" title="Permalink to this headline">¶</a></h1>
+<p>The python bindings to libnotmuch define <a class="reference external" href="http://packages.python.org/notmuch/index.html#notmuch.Thread" title="(in cnotmuch v0.9~rc1)"><tt class="xref py py-class docutils literal"><span class="pre">notmuch.Thread</span></tt></a> and
+<a class="reference external" href="http://packages.python.org/notmuch/index.html#notmuch.Message" title="(in cnotmuch v0.9~rc1)"><tt class="xref py py-class docutils literal"><span class="pre">notmuch.Message</span></tt></a>, which unfortunately are very fragile.
+Alot defines the wrapper classes <a class="reference internal" href="#alot.db.Thread" title="alot.db.Thread"><tt class="xref py py-class docutils literal"><span class="pre">Thread</span></tt></a> and <a class="reference internal" href="#alot.message.Message" title="alot.message.Message"><tt class="xref py py-class docutils literal"><span class="pre">Message</span></tt></a> that
+use an <a class="reference internal" href="#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager</span></tt></a> instance to transparently provide persistent objects.</p>
+<p><a class="reference internal" href="#alot.message.Message" title="alot.message.Message"><tt class="xref py py-class docutils literal"><span class="pre">Message</span></tt></a> moreover contains convenience methods
+to extract information about the message like reformated header values, a summary,
+decoded and interpreted body text and a list of <a class="reference internal" href="#alot.message.Attachment" title="alot.message.Attachment"><tt class="xref py py-class docutils literal"><span class="pre">Attachments</span></tt></a>.</p>
+<p>The central <a class="reference internal" href="interface.html#alot.ui.UI" title="alot.ui.UI"><tt class="xref py py-class docutils literal"><span class="pre">UI</span></tt></a> instance carries around a <a class="reference internal" href="#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager</span></tt></a> object that
+is used for any lookups or modifications of the email base. <a class="reference internal" href="#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager</span></tt></a> can
+directly look up <a class="reference internal" href="#alot.db.Thread" title="alot.db.Thread"><tt class="xref py py-class docutils literal"><span class="pre">Thread</span></tt></a> and <a class="reference internal" href="#alot.message.Message" title="alot.message.Message"><tt class="xref py py-class docutils literal"><span class="pre">Message</span></tt></a> objects and is able to
+postpone/cache/retry writing operations in case the Xapian index is locked by another
+process.</p>
+<div class="section" id="database-manager">
+<h2>Database Manager<a class="headerlink" href="#database-manager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="alot.db.DBManager">
+<em class="property">class </em><tt class="descclassname">alot.db.</tt><tt class="descname">DBManager</tt><big>(</big><em>path=None</em>, <em>ro=False</em><big>)</big><a class="headerlink" href="#alot.db.DBManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Keeps track of your index parameters, maintains a write-queue and
+lets you look up threads and messages directly to the persistent wrapper
+classes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>path</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; absolute path to the notmuch index</li>
+<li><strong>ro</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; open the index in read-only mode</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="alot.db.DBManager.flush">
+<tt class="descname">flush</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.db.DBManager.flush" title="Permalink to this definition">¶</a></dt>
+<dd><p>write out all queued write-commands in order, each one in a separate
+<a class="reference external" href="http://packages.python.org/notmuch/index.html#notmuch.Database.begin_atomic" title="(in cnotmuch v0.9~rc1)"><tt class="xref py py-meth docutils literal"><span class="pre">atomic</span></tt></a> transaction.</p>
+<p>If this fails the current action is rolled back, stays in the write
+queue and an exception is raised.
+You are responsible to retry flushing at a later time if you want to
+ensure that the cached changes are applied to the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Exception :</th><td class="field-body"><a class="reference internal" href="#alot.db.DatabaseROError" title="alot.db.DatabaseROError"><tt class="xref py py-exc docutils literal"><span class="pre">DatabaseROError</span></tt></a> if db is opened in read-only mode</td>
+</tr>
+<tr class="field"><th class="field-name">Exception :</th><td class="field-body"><a class="reference internal" href="#alot.db.DatabaseLockedError" title="alot.db.DatabaseLockedError"><tt class="xref py py-exc docutils literal"><span class="pre">DatabaseLockedError</span></tt></a> if db is locked</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.DBManager.kill_search_processes">
+<tt class="descname">kill_search_processes</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.db.DBManager.kill_search_processes" title="Permalink to this definition">¶</a></dt>
+<dd><p>terminate all search processes that originate from
+this managers <a class="reference internal" href="#alot.db.DBManager.get_threads" title="alot.db.DBManager.get_threads"><tt class="xref py py-meth docutils literal"><span class="pre">get_threads()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.DBManager.tag">
+<tt class="descname">tag</tt><big>(</big><em>querystring</em>, <em>tags</em>, <em>afterwards=None</em>, <em>remove_rest=False</em><big>)</big><a class="headerlink" href="#alot.db.DBManager.tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>add tags to messages matching <cite>querystring</cite>.
+This appends a tag operation to the write queue and raises
+<a class="reference internal" href="#alot.db.DatabaseROError" title="alot.db.DatabaseROError"><tt class="xref py py-exc docutils literal"><span class="pre">DatabaseROError</span></tt></a> if in read only mode.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>querystring</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; notmuch search string</li>
+<li><strong>tags</strong> (<em>list of str</em>) &#8211; a list of tags to be added</li>
+<li><strong>afterwards</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#callable" title="(in Python v3.2)"><em>callable</em></a>) &#8211; callback that gets called after successful
+application of this tagging operation</li>
+<li><strong>remove_rest</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; remove tags from matching messages before tagging</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Exception :</th><td class="field-body"><p class="first last"><a class="reference internal" href="#alot.db.DatabaseROError" title="alot.db.DatabaseROError"><tt class="xref py py-exc docutils literal"><span class="pre">DatabaseROError</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You need to call <a class="reference internal" href="#alot.db.DBManager.flush" title="alot.db.DBManager.flush"><tt class="xref py py-meth docutils literal"><span class="pre">DBManager.flush()</span></tt></a> to actually write out.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.DBManager.untag">
+<tt class="descname">untag</tt><big>(</big><em>querystring</em>, <em>tags</em>, <em>afterwards=None</em><big>)</big><a class="headerlink" href="#alot.db.DBManager.untag" title="Permalink to this definition">¶</a></dt>
+<dd><p>removes tags from messages that match <cite>querystring</cite>.
+This appends an untag operation to the write queue and raises
+<a class="reference internal" href="#alot.db.DatabaseROError" title="alot.db.DatabaseROError"><tt class="xref py py-exc docutils literal"><span class="pre">DatabaseROError</span></tt></a> if in read only mode.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>querystring</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; notmuch search string</li>
+<li><strong>tags</strong> (<em>list of str</em>) &#8211; a list of tags to be added</li>
+<li><strong>afterwards</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#callable" title="(in Python v3.2)"><em>callable</em></a>) &#8211; callback that gets called after successful
+application of this tagging operation</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Exception :</th><td class="field-body"><p class="first last"><a class="reference internal" href="#alot.db.DatabaseROError" title="alot.db.DatabaseROError"><tt class="xref py py-exc docutils literal"><span class="pre">DatabaseROError</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You need to call <a class="reference internal" href="#alot.db.DBManager.flush" title="alot.db.DBManager.flush"><tt class="xref py py-meth docutils literal"><span class="pre">DBManager.flush()</span></tt></a> to actually write out.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.DBManager.count_messages">
+<tt class="descname">count_messages</tt><big>(</big><em>querystring</em><big>)</big><a class="headerlink" href="#alot.db.DBManager.count_messages" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns number of messages that match <cite>querystring</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.DBManager.search_thread_ids">
+<tt class="descname">search_thread_ids</tt><big>(</big><em>querystring</em><big>)</big><a class="headerlink" href="#alot.db.DBManager.search_thread_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the ids of all threads that match the <cite>querystring</cite>
+This copies! all integer thread ids into an new list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">list of str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.DBManager.get_thread">
+<tt class="descname">get_thread</tt><big>(</big><em>tid</em><big>)</big><a class="headerlink" href="#alot.db.DBManager.get_thread" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns <a class="reference internal" href="#alot.db.Thread" title="alot.db.Thread"><tt class="xref py py-class docutils literal"><span class="pre">Thread</span></tt></a> with given thread id (str)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.DBManager.get_message">
+<tt class="descname">get_message</tt><big>(</big><em>mid</em><big>)</big><a class="headerlink" href="#alot.db.DBManager.get_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns <tt class="xref py py-class docutils literal"><span class="pre">Message</span></tt> with given message id (str)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.DBManager.get_all_tags">
+<tt class="descname">get_all_tags</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.db.DBManager.get_all_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns all tagsstrings used in the database
+:rtype: list of str</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.DBManager.async">
+<tt class="descname">async</tt><big>(</big><em>cbl</em>, <em>fun</em><big>)</big><a class="headerlink" href="#alot.db.DBManager.async" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a pair (pipe, process) so that the process writes
+<cite>fun(a)</cite> to the pipe for each element <cite>a</cite> in the iterable returned
+by the callable <cite>cbl</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cbl</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#callable" title="(in Python v3.2)"><em>callable</em></a>) &#8211; a function returning something iterable</li>
+<li><strong>fun</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#callable" title="(in Python v3.2)"><em>callable</em></a>) &#8211; an unary translation function</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(<tt class="xref py py-class docutils literal"><span class="pre">multiprocessing.Pipe</span></tt>,
+<a class="reference external" href="http://docs.python.org/3.2/library/multiprocessing.html#multiprocessing.Process" title="(in Python v3.2)"><tt class="xref py py-class docutils literal"><span class="pre">multiprocessing.Process</span></tt></a>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.DBManager.get_threads">
+<tt class="descname">get_threads</tt><big>(</big><em>querystring</em>, <em>sort='newest_first'</em><big>)</big><a class="headerlink" href="#alot.db.DBManager.get_threads" title="Permalink to this definition">¶</a></dt>
+<dd><p>asynchronously look up thread ids matching <cite>querystring</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>querystring</strong> (<em>str.</em>) &#8211; The query string to use for the lookup</li>
+<li><strong>sort</strong> &#8211; Sort order. one of [&#8216;oldest_first&#8217;, &#8216;newest_first&#8217;,
+&#8216;message_id&#8217;, &#8216;unsorted&#8217;]</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a pipe together with the process that asynchronously
+writes to it.</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(<tt class="xref py py-class docutils literal"><span class="pre">multiprocessing.Pipe</span></tt>,
+<a class="reference external" href="http://docs.python.org/3.2/library/multiprocessing.html#multiprocessing.Process" title="(in Python v3.2)"><tt class="xref py py-class docutils literal"><span class="pre">multiprocessing.Process</span></tt></a>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.DBManager.query">
+<tt class="descname">query</tt><big>(</big><em>querystring</em><big>)</big><a class="headerlink" href="#alot.db.DBManager.query" title="Permalink to this definition">¶</a></dt>
+<dd><p>creates <a class="reference external" href="http://packages.python.org/notmuch/index.html#notmuch.Query" title="(in cnotmuch v0.9~rc1)"><tt class="xref py py-class docutils literal"><span class="pre">notmuch.Query</span></tt></a> objects on demand</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>querystring</strong> &#8211; The query string to use for the lookup</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference external" href="http://packages.python.org/notmuch/index.html#notmuch.Query" title="(in cnotmuch v0.9~rc1)"><tt class="xref py py-class docutils literal"><span class="pre">notmuch.Query</span></tt></a> &#8211; the query object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.DBManager.add_message">
+<tt class="descname">add_message</tt><big>(</big><em>path</em><big>)</big><a class="headerlink" href="#alot.db.DBManager.add_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a file to the notmuch index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; path to the file</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">the message object corresponding the added message</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#alot.message.Message" title="alot.message.Message"><tt class="xref py py-class docutils literal"><span class="pre">alot.message.Message</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.DBManager.remove_message">
+<tt class="descname">remove_message</tt><big>(</big><em>message</em><big>)</big><a class="headerlink" href="#alot.db.DBManager.remove_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a message from the notmuch index</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>message</strong> (<tt class="xref py py-class docutils literal"><span class="pre">Message</span></tt>) &#8211; message to remove</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="exceptions">
+<h2>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="alot.db.DatabaseError">
+<em class="property">class </em><tt class="descclassname">alot.db.</tt><tt class="descname">DatabaseError</tt><a class="headerlink" href="#alot.db.DatabaseError" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="alot.db.DatabaseROError">
+<em class="property">class </em><tt class="descclassname">alot.db.</tt><tt class="descname">DatabaseROError</tt><a class="headerlink" href="#alot.db.DatabaseROError" title="Permalink to this definition">¶</a></dt>
+<dd><p>cannot write to read-only database</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.db.DatabaseLockedError">
+<em class="property">class </em><tt class="descclassname">alot.db.</tt><tt class="descname">DatabaseLockedError</tt><a class="headerlink" href="#alot.db.DatabaseLockedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>cannot write to locked index</p>
+</dd></dl>
+
+</div>
+<div class="section" id="wrapper">
+<h2>Wrapper<a class="headerlink" href="#wrapper" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="alot.db.Thread">
+<em class="property">class </em><tt class="descclassname">alot.db.</tt><tt class="descname">Thread</tt><big>(</big><em>dbman</em>, <em>thread</em><big>)</big><a class="headerlink" href="#alot.db.Thread" title="Permalink to this definition">¶</a></dt>
+<dd><p>A wrapper around a notmuch mailthread (<tt class="xref py py-class docutils literal"><span class="pre">notmuch.database.Thread</span></tt>)
+that ensures persistence of the thread: It can be safely read multiple
+times, its manipulation is done via a <a class="reference internal" href="#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager</span></tt></a> and it
+can directly provide contained messages as <a class="reference internal" href="#alot.message.Message" title="alot.message.Message"><tt class="xref py py-class docutils literal"><span class="pre">Message</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dbman</strong> (<a class="reference internal" href="#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager</span></tt></a>) &#8211; db manager that is used for further lookups</li>
+<li><strong>thread</strong> (<tt class="xref py py-class docutils literal"><span class="pre">notmuch.database.Thread</span></tt>) &#8211; the wrapped thread</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="alot.db.Thread.refresh">
+<tt class="descname">refresh</tt><big>(</big><em>thread=None</em><big>)</big><a class="headerlink" href="#alot.db.Thread.refresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>refresh thread metadata from the index</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.Thread.get_thread_id">
+<tt class="descname">get_thread_id</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.db.Thread.get_thread_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns id of this thread</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.Thread.get_tags">
+<tt class="descname">get_tags</tt><big>(</big><em>intersection=False</em><big>)</big><a class="headerlink" href="#alot.db.Thread.get_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns tagsstrings attached to this thread</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>intersection</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; return tags present in all contained messages
+instead of in at least one (union)</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">set of str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.Thread.add_tags">
+<tt class="descname">add_tags</tt><big>(</big><em>tags</em>, <em>afterwards=None</em>, <em>remove_rest=False</em><big>)</big><a class="headerlink" href="#alot.db.Thread.add_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>add <cite>tags</cite> to all messages in this thread</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This only adds the requested operation to this objects
+<a class="reference internal" href="#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager's</span></tt></a> write queue.
+You need to call <a class="reference internal" href="#alot.db.DBManager.flush" title="alot.db.DBManager.flush"><tt class="xref py py-meth docutils literal"><span class="pre">DBManager.flush()</span></tt></a> to actually write out.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tags</strong> (<em>list of str</em>) &#8211; a list of tags to be added</li>
+<li><strong>afterwards</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#callable" title="(in Python v3.2)"><em>callable</em></a>) &#8211; callback that gets called after successful
+application of this tagging operation</li>
+<li><strong>remove_rest</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; remove all other tags</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.Thread.remove_tags">
+<tt class="descname">remove_tags</tt><big>(</big><em>tags</em>, <em>afterwards=None</em><big>)</big><a class="headerlink" href="#alot.db.Thread.remove_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove <cite>tags</cite> (list of str) from all messages in this thread</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This only adds the requested operation to this objects
+<a class="reference internal" href="#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager's</span></tt></a> write queue.
+You need to call <a class="reference internal" href="#alot.db.DBManager.flush" title="alot.db.DBManager.flush"><tt class="xref py py-meth docutils literal"><span class="pre">DBManager.flush()</span></tt></a> to actually write out.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tags</strong> (<em>list of str</em>) &#8211; a list of tags to be added</li>
+<li><strong>afterwards</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#callable" title="(in Python v3.2)"><em>callable</em></a>) &#8211; callback that gets called after successful
+application of this tagging operation</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.Thread.get_authors">
+<tt class="descname">get_authors</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.db.Thread.get_authors" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns authors string</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.Thread.get_subject">
+<tt class="descname">get_subject</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.db.Thread.get_subject" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns subject string</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.Thread.get_toplevel_messages">
+<tt class="descname">get_toplevel_messages</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.db.Thread.get_toplevel_messages" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns all toplevel messages contained in this thread.
+This are all the messages without a parent message
+(identified by &#8216;in-reply-to&#8217; or &#8216;references&#8217; header.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">list of <a class="reference internal" href="#alot.message.Message" title="alot.message.Message"><tt class="xref py py-class docutils literal"><span class="pre">Message</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.Thread.get_messages">
+<tt class="descname">get_messages</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.db.Thread.get_messages" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns all messages in this thread as dict mapping all contained
+messages to their direct responses.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">dict mapping <a class="reference internal" href="#alot.message.Message" title="alot.message.Message"><tt class="xref py py-class docutils literal"><span class="pre">Message</span></tt></a> to a list of
+<a class="reference internal" href="#alot.message.Message" title="alot.message.Message"><tt class="xref py py-class docutils literal"><span class="pre">Message</span></tt></a>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.Thread.get_replies_to">
+<tt class="descname">get_replies_to</tt><big>(</big><em>msg</em><big>)</big><a class="headerlink" href="#alot.db.Thread.get_replies_to" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns all replies to the given message contained in this thread.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>msg</strong> (<a class="reference internal" href="#alot.message.Message" title="alot.message.Message"><tt class="xref py py-class docutils literal"><span class="pre">Message</span></tt></a>) &#8211; parent message to look up</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">list of <a class="reference internal" href="#alot.message.Message" title="alot.message.Message"><tt class="xref py py-class docutils literal"><span class="pre">Message</span></tt></a> or <cite>None</cite></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.Thread.get_newest_date">
+<tt class="descname">get_newest_date</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.db.Thread.get_newest_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns date header of newest message in this thread as
+<a class="reference external" href="http://docs.python.org/3.2/library/datetime.html#datetime.datetime" title="(in Python v3.2)"><tt class="xref py py-class docutils literal"><span class="pre">datetime</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.Thread.get_oldest_date">
+<tt class="descname">get_oldest_date</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.db.Thread.get_oldest_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns date header of oldest message in this thread as
+<a class="reference external" href="http://docs.python.org/3.2/library/datetime.html#datetime.datetime" title="(in Python v3.2)"><tt class="xref py py-class docutils literal"><span class="pre">datetime</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.Thread.get_total_messages">
+<tt class="descname">get_total_messages</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.db.Thread.get_total_messages" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns number of contained messages</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.db.Thread.matches">
+<tt class="descname">matches</tt><big>(</big><em>query</em><big>)</big><a class="headerlink" href="#alot.db.Thread.matches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if this thread matches the given notmuch query.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/string.html#string" title="(in Python v3.2)"><em>string</em></a>) &#8211; The query to check against</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">True if this thread matches the given query, False otherwise</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-alot.message"></span><dl class="class">
+<dt id="alot.message.Message">
+<em class="property">class </em><tt class="descclassname">alot.message.</tt><tt class="descname">Message</tt><big>(</big><em>dbman</em>, <em>msg</em>, <em>thread=None</em><big>)</big><a class="headerlink" href="#alot.message.Message" title="Permalink to this definition">¶</a></dt>
+<dd><p>a persistent notmuch message object.
+It it uses a <a class="reference internal" href="#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager</span></tt></a> for cached manipulation
+and lazy lookups.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dbman</strong> (<a class="reference internal" href="#alot.db.DBManager" title="alot.db.DBManager"><em>alot.db.DBManager</em></a>) &#8211; db manager that is used for further lookups</li>
+<li><strong>msg</strong> (<em>notmuch.database.Message</em>) &#8211; the wrapped message</li>
+<li><strong>thread</strong> (<a class="reference internal" href="#alot.db.Thread" title="alot.db.Thread"><tt class="xref py py-class docutils literal"><span class="pre">Thread</span></tt></a> or <cite>None</cite>) &#8211; this messages thread (will be looked up later if <cite>None</cite>)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="alot.message.Message.get_email">
+<tt class="descname">get_email</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Message.get_email" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns <tt class="xref py py-class docutils literal"><span class="pre">email.Message</span></tt> for this message</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.get_date">
+<tt class="descname">get_date</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Message.get_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns Date header value as <a class="reference external" href="http://docs.python.org/3.2/library/datetime.html#datetime.datetime" title="(in Python v3.2)"><tt class="xref py py-class docutils literal"><span class="pre">datetime</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.get_filename">
+<tt class="descname">get_filename</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Message.get_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns absolute path of message files location</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.get_message_id">
+<tt class="descname">get_message_id</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Message.get_message_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns messages id (str)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.get_thread_id">
+<tt class="descname">get_thread_id</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Message.get_thread_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns id (str) of the thread this message belongs to</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.get_message_parts">
+<tt class="descname">get_message_parts</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Message.get_message_parts" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a list of all body parts of this message</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.get_tags">
+<tt class="descname">get_tags</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Message.get_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns tags attached to this message as list of strings</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.get_thread">
+<tt class="descname">get_thread</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Message.get_thread" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the <a class="reference internal" href="#alot.db.Thread" title="alot.db.Thread"><tt class="xref py py-class docutils literal"><span class="pre">Thread</span></tt></a> this msg belongs to</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.has_replies">
+<tt class="descname">has_replies</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Message.has_replies" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns true if this message has at least one reply</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.get_replies">
+<tt class="descname">get_replies</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Message.get_replies" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns replies to this message as list of <a class="reference internal" href="#alot.message.Message" title="alot.message.Message"><tt class="xref py py-class docutils literal"><span class="pre">Message</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.get_datestring">
+<tt class="descname">get_datestring</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Message.get_datestring" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns reformated datestring for this messages.</p>
+<p>It uses the format spacified by <cite>timestamp_format</cite> in
+the general section of the config.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.get_author">
+<tt class="descname">get_author</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Message.get_author" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns realname and address of this messages author</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">(str,str)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.get_headers_string">
+<tt class="descname">get_headers_string</tt><big>(</big><em>headers</em><big>)</big><a class="headerlink" href="#alot.message.Message.get_headers_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns subset of this messages headers as human-readable format:
+all header values are decoded, the resulting string has
+one line &#8220;KEY: VALUE&#8221; for each requested header present in the mail.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>headers</strong> (<em>list of str</em>) &#8211; headers to extract</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.add_tags">
+<tt class="descname">add_tags</tt><big>(</big><em>tags</em>, <em>afterwards=None</em>, <em>remove_rest=False</em><big>)</big><a class="headerlink" href="#alot.message.Message.add_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>adds tags to message</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This only adds the requested operation to this objects
+<a class="reference internal" href="#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager's</span></tt></a> write queue.
+You need to call <a class="reference internal" href="#alot.db.DBManager.flush" title="alot.db.DBManager.flush"><tt class="xref py py-meth docutils literal"><span class="pre">flush()</span></tt></a> to write out.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tags</strong> (<em>list of str</em>) &#8211; a list of tags to be added</li>
+<li><strong>afterwards</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#callable" title="(in Python v3.2)"><em>callable</em></a>) &#8211; callback that gets called after successful
+application of this tagging operation</li>
+<li><strong>remove_rest</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; remove all other tags</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.remove_tags">
+<tt class="descname">remove_tags</tt><big>(</big><em>tags</em>, <em>afterwards=None</em><big>)</big><a class="headerlink" href="#alot.message.Message.remove_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove tags from message</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This only adds the requested operation to this objects
+<a class="reference internal" href="#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager's</span></tt></a> write queue.
+You need to call <a class="reference internal" href="#alot.db.DBManager.flush" title="alot.db.DBManager.flush"><tt class="xref py py-meth docutils literal"><span class="pre">flush()</span></tt></a> to actually out.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tags</strong> (<em>list of str</em>) &#8211; a list of tags to be added</li>
+<li><strong>afterwards</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#callable" title="(in Python v3.2)"><em>callable</em></a>) &#8211; callback that gets called after successful
+application of this tagging operation</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.get_attachments">
+<tt class="descname">get_attachments</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Message.get_attachments" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns all attachments.
+Presently, all mime parts of this message that don&#8217;t have content-type
+&#8216;text/plain&#8217;, or &#8216;text/html&#8217; are considered attachments.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">list of <a class="reference internal" href="#alot.message.Attachment" title="alot.message.Attachment"><tt class="xref py py-class docutils literal"><span class="pre">Attachment</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.accumulate_body">
+<tt class="descname">accumulate_body</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Message.accumulate_body" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns bodystring extracted from this mail</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Message.matches">
+<tt class="descname">matches</tt><big>(</big><em>querystring</em><big>)</big><a class="headerlink" href="#alot.message.Message.matches" title="Permalink to this definition">¶</a></dt>
+<dd><p>tests if this messages is in the resultset for <cite>querystring</cite></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="other-structures">
+<h2>Other Structures<a class="headerlink" href="#other-structures" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="alot.message.Attachment">
+<em class="property">class </em><tt class="descclassname">alot.message.</tt><tt class="descname">Attachment</tt><big>(</big><em>emailpart</em><big>)</big><a class="headerlink" href="#alot.message.Attachment" title="Permalink to this definition">¶</a></dt>
+<dd><p>represents a mail attachment</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>emailpart</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/email.message.html#email.message.Message" title="(in Python v3.2)"><tt class="xref py py-class docutils literal"><span class="pre">email.message.Message</span></tt></a>) &#8211; a non-multipart email that is the attachment</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="alot.message.Attachment.get_filename">
+<tt class="descname">get_filename</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Attachment.get_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>return name of attached file.
+If the content-disposition header contains no file name,
+this returns <cite>None</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Attachment.get_content_type">
+<tt class="descname">get_content_type</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Attachment.get_content_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>mime type of the attachment part</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Attachment.get_size">
+<tt class="descname">get_size</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Attachment.get_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns attachments size in bytes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Attachment.save">
+<tt class="descname">save</tt><big>(</big><em>path</em><big>)</big><a class="headerlink" href="#alot.message.Attachment.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>save the attachment to disk. Uses <a class="reference internal" href="#alot.message.Attachment.get_filename" title="alot.message.Attachment.get_filename"><tt class="xref py py-meth docutils literal"><span class="pre">get_filename()</span></tt></a> in case path
+is a directory</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Attachment.get_data">
+<tt class="descname">get_data</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Attachment.get_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>return data blob from wrapped file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Attachment.get_mime_representation">
+<tt class="descname">get_mime_representation</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Attachment.get_mime_representation" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns mime part that constitutes this attachment</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.message.Envelope">
+<em class="property">class </em><tt class="descclassname">alot.message.</tt><tt class="descname">Envelope</tt><big>(</big><em>template=None</em>, <em>bodytext=u''</em>, <em>headers={}</em>, <em>attachments=</em><span class="optional">[</span><span class="optional">]</span>, <em>sign=False</em>, <em>encrypt=False</em><big>)</big><a class="headerlink" href="#alot.message.Envelope" title="Permalink to this definition">¶</a></dt>
+<dd><p>a message that is not yet sent and still editable</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>template</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; if not None, the envelope will be initialised by
+<a class="reference internal" href="#alot.message.Envelope.parse_template" title="alot.message.Envelope.parse_template"><tt class="xref py py-meth docutils literal"><span class="pre">parsing</span></tt></a> this string before
+setting any other values given to this constructor.</li>
+<li><strong>bodytext</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; text used as body part</li>
+<li><strong>headers</strong> (<em>dict (str -&gt; unicode)</em>) &#8211; unencoded header values</li>
+<li><strong>attachments</strong> (list of <a class="reference internal" href="#alot.message.Attachment" title="alot.message.Attachment"><tt class="xref py py-class docutils literal"><span class="pre">Attachment</span></tt></a>) &#8211; file attachments to include</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="alot.message.Envelope.get">
+<tt class="descname">get</tt><big>(</big><em>key</em>, <em>fallback=None</em><big>)</big><a class="headerlink" href="#alot.message.Envelope.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>secure getter for header values that allows specifying a <cite>fallback</cite>
+return string (defaults to None). This returns the first matching value
+and doesn&#8217;t raise KeyErrors</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Envelope.get_all">
+<tt class="descname">get_all</tt><big>(</big><em>key</em>, <em>fallback=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#alot.message.Envelope.get_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns all header values for given key</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Envelope.add">
+<tt class="descname">add</tt><big>(</big><em>key</em>, <em>value</em><big>)</big><a class="headerlink" href="#alot.message.Envelope.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>add header value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Envelope.attach">
+<tt class="descname">attach</tt><big>(</big><em>attachment</em>, <em>filename=None</em>, <em>ctype=None</em><big>)</big><a class="headerlink" href="#alot.message.Envelope.attach" title="Permalink to this definition">¶</a></dt>
+<dd><p>attach a file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attachment</strong> (<a class="reference internal" href="#alot.message.Attachment" title="alot.message.Attachment"><tt class="xref py py-class docutils literal"><span class="pre">Attachment</span></tt></a> or str) &#8211; File to attach, given as <a class="reference internal" href="#alot.message.Attachment" title="alot.message.Attachment"><tt class="xref py py-class docutils literal"><span class="pre">Attachment</span></tt></a> object
+or (globable) path to the file(s).</li>
+<li><strong>filename</strong> &#8211; filename to use in content-disposition.
+Will be ignored if <cite>path</cite> matches multiple files</li>
+<li><strong>ctype</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; force content-type to be used for this attachment</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Envelope.construct_mail">
+<tt class="descname">construct_mail</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.message.Envelope.construct_mail" title="Permalink to this definition">¶</a></dt>
+<dd><p>compiles the information contained in this envelope into a
+<tt class="xref py py-class docutils literal"><span class="pre">email.Message</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.message.Envelope.parse_template">
+<tt class="descname">parse_template</tt><big>(</big><em>tmp</em>, <em>reset=False</em><big>)</big><a class="headerlink" href="#alot.message.Envelope.parse_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>parses a template or user edited string to fills this envelope.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tmp</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; the string to parse.</li>
+<li><strong>reset</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; remove previous envelope content</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Email Database</a><ul>
+<li><a class="reference internal" href="#database-manager">Database Manager</a></li>
+<li><a class="reference internal" href="#exceptions">Exceptions</a></li>
+<li><a class="reference internal" href="#wrapper">Wrapper</a></li>
+<li><a class="reference internal" href="#other-structures">Other Structures</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter"><cite>alot</cite> Developer Manual</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="interface.html"
+                        title="next chapter">User Interface</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="interface.html" title="User Interface"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="alot Developer Manual"
+             >previous</a> |</li>
+        <li><a href="index.html">alot v0.2-324-g5224 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011 Patrick Totzke.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

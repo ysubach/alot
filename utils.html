@@ -1,0 +1,314 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Utils &mdash; alot v0.2-324-g5224 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.2-324-g5224',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="alot v0.2-324-g5224 documentation" href="index.html" />
+    <link rel="next" title="Commands" href="commands.html" />
+    <link rel="prev" title="Accounts" href="accounts.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="commands.html" title="Commands"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="accounts.html" title="Accounts"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">alot v0.2-324-g5224 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-alot.helper">
+<span id="utils"></span><h1>Utils<a class="headerlink" href="#module-alot.helper" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="alot.helper.safely_get">
+<tt class="descclassname">alot.helper.</tt><tt class="descname">safely_get</tt><big>(</big><em>clb</em>, <em>E</em>, <em>on_error=''</em><big>)</big><a class="headerlink" href="#alot.helper.safely_get" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns result of <tt class="xref py py-func docutils literal"><span class="pre">clb()</span></tt> and falls back to <cite>on_error</cite>
+in case <cite>E</cite> is raised.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>clb</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#callable" title="(in Python v3.2)"><em>callable</em></a>) &#8211; function to evaluate</li>
+<li><strong>E</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/exceptions.html#Exception" title="(in Python v3.2)"><em>Exception</em></a>) &#8211; exception to catch</li>
+<li><strong>on_error</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; default string returned when exception is caught</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="alot.helper.string_sanitize">
+<tt class="descclassname">alot.helper.</tt><tt class="descname">string_sanitize</tt><big>(</big><em>string</em>, <em>tab_width=None</em><big>)</big><a class="headerlink" href="#alot.helper.string_sanitize" title="Permalink to this definition">¶</a></dt>
+<dd><p>strips, and replaces non-printable characters</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tab_width</strong> (int or <cite>None</cite>) &#8211; number of spaces to replace tabs with. Read from
+<cite>globals.tabwidth</cite> setting if <cite>None</cite></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">string_sanitize</span><span class="p">(</span><span class="s">&#39; foo</span><span class="se">\r</span><span class="s">bar &#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+<span class="go">&#39;foobar&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">string_sanitize</span><span class="p">(</span><span class="s">&#39;foo</span><span class="se">\t</span><span class="s">bar&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+<span class="go">&#39;foo     bar&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">string_sanitize</span><span class="p">(</span><span class="s">&#39;foo</span><span class="se">\t\t</span><span class="s">bar&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+<span class="go">&#39;foo             bar&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="alot.helper.string_decode">
+<tt class="descclassname">alot.helper.</tt><tt class="descname">string_decode</tt><big>(</big><em>string</em>, <em>enc='ascii'</em><big>)</big><a class="headerlink" href="#alot.helper.string_decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>safely decodes string to unicode bytestring,
+respecting <cite>enc</cite> as a hint</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alot.helper.shorten_author_string">
+<tt class="descclassname">alot.helper.</tt><tt class="descname">shorten_author_string</tt><big>(</big><em>authors_string</em>, <em>maxlength</em><big>)</big><a class="headerlink" href="#alot.helper.shorten_author_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a list of authors concatenated as a text string (comma
+separated) and smartly adjust them to maxlength.</p>
+<p>1) If the complete list of sender names does not fit in maxlength, it
+tries to shorten names by using only the first part of each.</p>
+<p>2) If the list is still too long, hide authors according to the
+following priority:</p>
+<blockquote>
+<div><ul class="simple">
+<li>First author is always shown (if too long is shorten with ellipsis)</li>
+<li>If possible, last author is also shown (if too long, uses
+ellipsis)</li>
+<li>If there are more than 2 authors in the thread, show the
+maximum of them. More recent senders have more priority (Is
+the list of authors already sorted by the date of msgs????)</li>
+<li>If it is finally necessary to hide any author, an ellipsis
+between first and next authors is added.</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt>EXAMPLE (authors string with different length constrains):</dt>
+<dd>&#8216;King Kong, Mucho Muchacho, Jaime Huerta, Flash Gordon&#8217;
+&#8216;King, Mucho, Jaime, Flash&#8217;
+&#8216;King, ., Jaime, Flash&#8217;
+&#8216;King, ., J., Flash&#8217;
+&#8216;King, ., Flash&#8217;
+&#8216;King, ., Fl.&#8217;
+&#8216;King, .&#8217;
+&#8216;K., .&#8217;
+&#8216;K.&#8217;</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="alot.helper.pretty_datetime">
+<tt class="descclassname">alot.helper.</tt><tt class="descname">pretty_datetime</tt><big>(</big><em>d</em><big>)</big><a class="headerlink" href="#alot.helper.pretty_datetime" title="Permalink to this definition">¶</a></dt>
+<dd><p>translates <tt class="xref py py-class docutils literal"><span class="pre">datetime</span></tt> <cite>d</cite> to a &#8220;sup-style&#8221; human readable string.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pretty_datetime</span><span class="p">(</span><span class="n">now</span><span class="p">)</span>
+<span class="go">&#39;09:31am&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">one_day_ago</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pretty_datetime</span><span class="p">(</span><span class="n">one_day_ago</span><span class="p">)</span>
+<span class="go">&#39;Yest. 9am&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">thirty_days_ago</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pretty_datetime</span><span class="p">(</span><span class="n">thirty_days_ago</span><span class="p">)</span>
+<span class="go">&#39;Nov 01&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">one_year_ago</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="mi">356</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pretty_datetime</span><span class="p">(</span><span class="n">one_year_ago</span><span class="p">)</span>
+<span class="go">&#39;Dec 2010&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="alot.helper.call_cmd">
+<tt class="descclassname">alot.helper.</tt><tt class="descname">call_cmd</tt><big>(</big><em>cmdlist</em>, <em>stdin=None</em><big>)</big><a class="headerlink" href="#alot.helper.call_cmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>get a shell commands output, error message and return value and immediately
+return.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This returns with the first screen content for interctive commands.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cmdlist</strong> (<em>list of str</em>) &#8211; shellcommand to call, already splitted into a list accepted
+by <tt class="xref py py-meth docutils literal"><span class="pre">subprocess.Popen()</span></tt></li>
+<li><strong>stdin</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; string to pipe to the process</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">triple of stdout, error msg, return value of the shell command</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str, str, int</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="alot.helper.guess_mimetype">
+<tt class="descclassname">alot.helper.</tt><tt class="descname">guess_mimetype</tt><big>(</big><em>blob</em><big>)</big><a class="headerlink" href="#alot.helper.guess_mimetype" title="Permalink to this definition">¶</a></dt>
+<dd><p>uses file magic to determine the mime-type of the given data blob.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>blob</strong> (<em>data</em>) &#8211; file content as read by file.read()</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">mime-type</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="alot.helper.guess_encoding">
+<tt class="descclassname">alot.helper.</tt><tt class="descname">guess_encoding</tt><big>(</big><em>blob</em><big>)</big><a class="headerlink" href="#alot.helper.guess_encoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>uses file magic to determine the encoding of the given data blob.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>blob</strong> (<em>data</em>) &#8211; file content as read by file.read()</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">encoding</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="alot.helper.shell_quote">
+<tt class="descclassname">alot.helper.</tt><tt class="descname">shell_quote</tt><big>(</big><em>text</em><big>)</big><a class="headerlink" href="#alot.helper.shell_quote" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">shell_quote</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">))</span>
+<span class="go">&#39;hello&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">shell_quote</span><span class="p">(</span><span class="s">&quot;hello&#39;there&quot;</span><span class="p">))</span>
+<span class="go">&#39;hello&#39;&quot;&#39;&quot;&#39;there&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="alot.helper.tag_cmp">
+<tt class="descclassname">alot.helper.</tt><tt class="descname">tag_cmp</tt><big>(</big><em>a</em>, <em>b</em><big>)</big><a class="headerlink" href="#alot.helper.tag_cmp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorting tags using this function puts all tags of length 1 at the
+beginning. This groups all tags mapped to unicode characters.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alot.helper.humanize_size">
+<tt class="descclassname">alot.helper.</tt><tt class="descname">humanize_size</tt><big>(</big><em>size</em><big>)</big><a class="headerlink" href="#alot.helper.humanize_size" title="Permalink to this definition">¶</a></dt>
+<dd><div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">humanize_size</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">&#39;1&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">humanize_size</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="go">&#39;123&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">humanize_size</span><span class="p">(</span><span class="mi">1234</span><span class="p">)</span>
+<span class="go">&#39;1K&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">humanize_size</span><span class="p">(</span><span class="mi">1234</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">)</span>
+<span class="go">&#39;1.2M&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">humanize_size</span><span class="p">(</span><span class="mi">1234</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">)</span>
+<span class="go">&#39;1234.0M&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="accounts.html"
+                        title="previous chapter">Accounts</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="commands.html"
+                        title="next chapter">Commands</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="commands.html" title="Commands"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="accounts.html" title="Accounts"
+             >previous</a> |</li>
+        <li><a href="index.html">alot v0.2-324-g5224 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011 Patrick Totzke.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

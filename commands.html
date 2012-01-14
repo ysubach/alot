@@ -1,0 +1,1053 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Commands &mdash; alot v0.2-324-g5224 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.2-324-g5224',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="alot v0.2-324-g5224 documentation" href="index.html" />
+    <link rel="prev" title="Utils" href="utils.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="utils.html" title="Utils"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">alot v0.2-324-g5224 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-alot.commands">
+<span id="commands"></span><h1>Commands<a class="headerlink" href="#module-alot.commands" title="Permalink to this headline">¶</a></h1>
+<p>User actions are represented by <a class="reference internal" href="#alot.commands.Command" title="alot.commands.Command"><tt class="xref py py-class docutils literal"><span class="pre">Command</span></tt></a> objects that can then be triggered by
+<a class="reference internal" href="interface.html#alot.ui.UI.apply_command" title="alot.ui.UI.apply_command"><tt class="xref py py-meth docutils literal"><span class="pre">alot.ui.UI.apply_command()</span></tt></a>.
+Commandline strings given by the user via the prompt or keybindings can be translated to
+<a class="reference internal" href="#alot.commands.Command" title="alot.commands.Command"><tt class="xref py py-class docutils literal"><span class="pre">Command</span></tt></a> objects using <a class="reference internal" href="#alot.commands.commandfactory" title="alot.commands.commandfactory"><tt class="xref py py-func docutils literal"><span class="pre">alot.commands.commandfactory()</span></tt></a>.
+Specific actions are defined as subclasses of <a class="reference internal" href="#alot.commands.Command" title="alot.commands.Command"><tt class="xref py py-class docutils literal"><span class="pre">Command</span></tt></a> and can be registered
+to a global command pool using the <a class="reference internal" href="#alot.commands.registerCommand" title="alot.commands.registerCommand"><tt class="xref py py-class docutils literal"><span class="pre">registerCommand</span></tt></a> decorator.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">that the return value
+of <a class="reference internal" href="#alot.commands.commandfactory" title="alot.commands.commandfactory"><tt class="xref py py-func docutils literal"><span class="pre">commandfactory()</span></tt></a> depends on the current <em>mode</em> the user interface is in.
+The mode identifier is a string that is uniquely defined by the currently focussed
+<a class="reference internal" href="interface.html#alot.buffers.Buffer" title="alot.buffers.Buffer"><tt class="xref py py-class docutils literal"><span class="pre">Buffer</span></tt></a>.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The names of the commands available to the user in any given mode do not correspond
+one-to-one to these subclasses. You can register a Command multiple times under different
+names, with different forced constructor parameters and so on. See for instance the
+definition of BufferFocusCommand in &#8216;commands/globals.py&#8217;:</p>
+<div class="last highlight-python"><pre>@registerCommand(MODE, 'bprevious', forced={'offset': -1},
+                 help='focus previous buffer')
+@registerCommand(MODE, 'bnext', forced={'offset': +1},
+                 help='focus next buffer')
+class BufferFocusCommand(Command):
+    def __init__(self, buffer=None, offset=0, **kwargs):
+    ...</pre>
+</div>
+</div>
+<dl class="class">
+<dt id="alot.commands.Command">
+<em class="property">class </em><tt class="descclassname">alot.commands.</tt><tt class="descname">Command</tt><big>(</big><em>prehook=None</em>, <em>posthook=None</em><big>)</big><a class="headerlink" href="#alot.commands.Command" title="Permalink to this definition">¶</a></dt>
+<dd><p>base class for commands</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prehook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly before
+applying this command</li>
+<li><strong>posthook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly after
+applying this command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="alot.commands.Command.apply">
+<tt class="descname">apply</tt><big>(</big><em>caller</em><big>)</big><a class="headerlink" href="#alot.commands.Command.apply" title="Permalink to this definition">¶</a></dt>
+<dd><p>code that gets executed when this command is applied</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.CommandParseError">
+<em class="property">class </em><tt class="descclassname">alot.commands.</tt><tt class="descname">CommandParseError</tt><a class="headerlink" href="#alot.commands.CommandParseError" title="Permalink to this definition">¶</a></dt>
+<dd><p>could not parse commandline string</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="alot.commands.CommandArgumentParser">
+<tt class="descclassname">alot.commands.</tt><tt class="descname">CommandArgumentParser</tt><a class="headerlink" href="#alot.commands.CommandArgumentParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">&lt;Mock</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x27cb690&gt;</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alot.commands.commandfactory">
+<tt class="descclassname">alot.commands.</tt><tt class="descname">commandfactory</tt><big>(</big><em>cmdline</em>, <em>mode='global'</em><big>)</big><a class="headerlink" href="#alot.commands.commandfactory" title="Permalink to this definition">¶</a></dt>
+<dd><p>parses <cite>cmdline</cite> and constructs a <a class="reference internal" href="#alot.commands.Command" title="alot.commands.Command"><tt class="xref py py-class docutils literal"><span class="pre">Command</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cmdline</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; command line to interpret</li>
+<li><strong>mode</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; mode identifier</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cmd</span> <span class="o">=</span> <span class="n">alot</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">commandfactory</span><span class="p">(</span><span class="s">&#39;save --all /foo&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;thread&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cmd</span>
+<span class="go">&lt;alot.commands.thread.SaveAttachmentCommand object at 0x272cf10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cmd</span><span class="o">.</span><span class="n">all</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cmd</span><span class="o">.</span><span class="n">path</span>
+<span class="go">u&#39;/foo&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="alot.commands.lookup_command">
+<tt class="descclassname">alot.commands.</tt><tt class="descname">lookup_command</tt><big>(</big><em>cmdname</em>, <em>mode</em><big>)</big><a class="headerlink" href="#alot.commands.lookup_command" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns commandclass, argparser and forced parameters used to construct
+a command for <cite>cmdname</cite> when called in <cite>mode</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cmdname</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the command to look up</li>
+<li><strong>mode</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; mode identifier</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(<a class="reference internal" href="#alot.commands.Command" title="alot.commands.Command"><tt class="xref py py-class docutils literal"><span class="pre">Command</span></tt></a>, <a class="reference external" href="http://docs.python.org/3.2/library/argparse.html#argparse.ArgumentParser" title="(in Python v3.2)"><tt class="xref py py-class docutils literal"><span class="pre">ArgumentParser</span></tt></a>,
+dict(str-&gt;dict))</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="alot.commands.lookup_parser">
+<tt class="descclassname">alot.commands.</tt><tt class="descname">lookup_parser</tt><big>(</big><em>cmdname</em>, <em>mode</em><big>)</big><a class="headerlink" href="#alot.commands.lookup_parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the <a class="reference internal" href="#alot.commands.CommandArgumentParser" title="alot.commands.CommandArgumentParser"><tt class="xref py py-class docutils literal"><span class="pre">CommandArgumentParser</span></tt></a> used to construct a
+command for <cite>cmdname</cite> when called in <cite>mode</cite>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span> <span class="o">=</span> <span class="n">lookup_command</span><span class="p">(</span><span class="s">&#39;save&#39;</span><span class="p">,</span> <span class="s">&#39;thread&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cmd</span>
+<span class="go">&lt;class &#39;alot.commands.thread.SaveAttachmentCommand&#39;&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.registerCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.</tt><tt class="descname">registerCommand</tt><big>(</big><em>mode</em>, <em>name</em>, <em>help=None</em>, <em>usage=None</em>, <em>forced={}</em>, <em>arguments=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#alot.commands.registerCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator used to register a <a class="reference internal" href="#alot.commands.Command" title="alot.commands.Command"><tt class="xref py py-class docutils literal"><span class="pre">Command</span></tt></a> as
+handler for command <cite>name</cite> in <cite>mode</cite> so that it
+can be looked up later using <a class="reference internal" href="#alot.commands.lookup_command" title="alot.commands.lookup_command"><tt class="xref py py-func docutils literal"><span class="pre">lookup_command()</span></tt></a>.</p>
+<p>Consider this example that shows how a <a class="reference internal" href="#alot.commands.Command" title="alot.commands.Command"><tt class="xref py py-class docutils literal"><span class="pre">Command</span></tt></a> class
+definition is decorated to register it as handler for
+&#8216;save&#8217; in mode &#8216;thread&#8217; and add boolean and string arguments:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@registerCommand</span><span class="p">(</span><span class="s">&#39;thread&#39;</span><span class="p">,</span> <span class="s">&#39;save&#39;</span><span class="p">,</span> <span class="n">arguments</span><span class="o">=</span><span class="p">[</span>
+    <span class="p">([</span><span class="s">&#39;--all&#39;</span><span class="p">],</span> <span class="p">{</span><span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="s">&#39;store_true&#39;</span><span class="p">,</span> <span class="s">&#39;help&#39;</span><span class="p">:</span><span class="s">&#39;save all&#39;</span><span class="p">}),</span>
+    <span class="p">([</span><span class="s">&#39;path&#39;</span><span class="p">],</span> <span class="p">{</span><span class="s">&#39;nargs&#39;</span><span class="p">:</span><span class="s">&#39;?&#39;</span><span class="p">,</span> <span class="s">&#39;help&#39;</span><span class="p">:</span><span class="s">&#39;path to save to&#39;</span><span class="p">})],</span>
+    <span class="n">help</span><span class="o">=</span><span class="s">&#39;save attachment(s)&#39;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">SaveAttachmentCommand</span><span class="p">(</span><span class="n">Command</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mode</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; mode identifier</li>
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; command name to register as</li>
+<li><strong>help</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; help string summarizing what this command does</li>
+<li><strong>usage</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; overides the auto generated usage string</li>
+<li><strong>forced</strong> (<em>dict (str-&gt;str)</em>) &#8211; keyword parameter used for commands constructor</li>
+<li><strong>arguments</strong> (<em>list of (list of str, dict (str-&gt;str)</em>) &#8211; list of arguments given as pairs (args, kwargs)
+accepted by
+<a class="reference external" href="http://docs.python.org/3.2/library/argparse.html#argparse.ArgumentParser.add_argument" title="(in Python v3.2)"><tt class="xref py py-meth docutils literal"><span class="pre">argparse.ArgumentParser.add_argument()</span></tt></a>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="section" id="module-alot.commands.globals">
+<span id="globals"></span><h2>Globals<a class="headerlink" href="#module-alot.commands.globals" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="alot.commands.globals.ExitCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.globals.</tt><tt class="descname">ExitCommand</tt><big>(</big><em>prehook=None</em>, <em>posthook=None</em><big>)</big><a class="headerlink" href="#alot.commands.globals.ExitCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>shut down cleanly</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prehook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly before
+applying this command</li>
+<li><strong>posthook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly after
+applying this command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.globals.SearchCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.globals.</tt><tt class="descname">SearchCommand</tt><big>(</big><em>query</em>, <em>sort=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.globals.SearchCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>open a new search buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; notmuch querystring</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.globals.PromptCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.globals.</tt><tt class="descname">PromptCommand</tt><big>(</big><em>startwith=''</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.globals.PromptCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>prompts for commandline and interprets it upon select</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>startwith</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; initial content of the prompt widget</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.globals.RefreshCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.globals.</tt><tt class="descname">RefreshCommand</tt><big>(</big><em>prehook=None</em>, <em>posthook=None</em><big>)</big><a class="headerlink" href="#alot.commands.globals.RefreshCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>refresh the current buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prehook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly before
+applying this command</li>
+<li><strong>posthook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly after
+applying this command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.globals.ExternalCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.globals.</tt><tt class="descname">ExternalCommand</tt><big>(</big><em>cmd</em>, <em>path=None</em>, <em>spawn=False</em>, <em>refocus=True</em>, <em>thread=False</em>, <em>on_success=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.globals.ExternalCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>run external command</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cmd</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; the command to call</li>
+<li><strong>path</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; a path to a file (or None)</li>
+<li><strong>spawn</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; run command in a new terminal</li>
+<li><strong>thread</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; run asynchronously, don&#8217;t block alot</li>
+<li><strong>refocus</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; refocus calling buffer after cmd termination</li>
+<li><strong>on_success</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#callable" title="(in Python v3.2)"><em>callable</em></a>) &#8211; code to execute after command successfully exited</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.globals.EditCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.globals.</tt><tt class="descname">EditCommand</tt><big>(</big><em>path</em>, <em>spawn=None</em>, <em>thread=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.globals.EditCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>edit a file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>path</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; path to the file to be edited</li>
+<li><strong>spawn</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; run command in a new terminal</li>
+<li><strong>thread</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; run asynchronously, don&#8217;t block alot</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.globals.PythonShellCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.globals.</tt><tt class="descname">PythonShellCommand</tt><big>(</big><em>prehook=None</em>, <em>posthook=None</em><big>)</big><a class="headerlink" href="#alot.commands.globals.PythonShellCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>open an interactive python shell for introspection</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prehook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly before
+applying this command</li>
+<li><strong>posthook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly after
+applying this command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.globals.BufferCloseCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.globals.</tt><tt class="descname">BufferCloseCommand</tt><big>(</big><em>prehook=None</em>, <em>posthook=None</em><big>)</big><a class="headerlink" href="#alot.commands.globals.BufferCloseCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>close current buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prehook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly before
+applying this command</li>
+<li><strong>posthook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly after
+applying this command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.globals.BufferFocusCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.globals.</tt><tt class="descname">BufferFocusCommand</tt><big>(</big><em>buffer=None</em>, <em>offset=0</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.globals.BufferFocusCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>focus a <a class="reference internal" href="interface.html#alot.buffers.Buffer" title="alot.buffers.Buffer"><tt class="xref py py-class docutils literal"><span class="pre">Buffer</span></tt></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>buffer</strong> (<cite>alot.buffers.Buffer</cite>) &#8211; the buffer to focus or None</li>
+<li><strong>offset</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#int" title="(in Python v3.2)"><em>int</em></a>) &#8211; position of the buffer to focus relative to the
+currently focussed one. This is used only if <cite>buffer</cite>
+is set to <cite>None</cite></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.globals.OpenBufferlistCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.globals.</tt><tt class="descname">OpenBufferlistCommand</tt><big>(</big><em>filtfun=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.globals.OpenBufferlistCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>open a list of active buffers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filtfun</strong> (<em>callable (str-&gt;bool)</em>) &#8211; filter to apply to displayed list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.globals.TagListCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.globals.</tt><tt class="descname">TagListCommand</tt><big>(</big><em>filtfun=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.globals.TagListCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>opens taglist buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filtfun</strong> (<em>callable (str-&gt;bool)</em>) &#8211; filter to apply to displayed list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.globals.FlushCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.globals.</tt><tt class="descname">FlushCommand</tt><big>(</big><em>prehook=None</em>, <em>posthook=None</em><big>)</big><a class="headerlink" href="#alot.commands.globals.FlushCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>flush write operations or retry until committed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prehook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly before
+applying this command</li>
+<li><strong>posthook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly after
+applying this command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.globals.HelpCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.globals.</tt><tt class="descname">HelpCommand</tt><big>(</big><em>commandname=''</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.globals.HelpCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>display help for a command. Use &#8216;bindings&#8217; to
+display all keybings interpreted in current mode.&#8217;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>commandname</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; command to document</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.globals.ComposeCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.globals.</tt><tt class="descname">ComposeCommand</tt><big>(</big><em>envelope=None</em>, <em>headers={}</em>, <em>template=None</em>, <em>sender=u''</em>, <em>subject=u''</em>, <em>to=</em><span class="optional">[</span><span class="optional">]</span>, <em>cc=</em><span class="optional">[</span><span class="optional">]</span>, <em>bcc=</em><span class="optional">[</span><span class="optional">]</span>, <em>attach=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.globals.ComposeCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>compose a new email</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>envelope</strong> (<a class="reference internal" href="database.html#alot.message.Envelope" title="alot.message.Envelope"><tt class="xref py py-class docutils literal"><span class="pre">Envelope</span></tt></a>) &#8211; use existing envelope</li>
+<li><strong>headers</strong> &#8211; forced header values</li>
+<li><strong>template</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of template to parse into the envelope after
+creation. This should be the name of a file in your
+template_dir</li>
+<li><strong>sender</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; From-header value</li>
+<li><strong>subject</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; Subject-header value</li>
+<li><strong>to</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; To-header value</li>
+<li><strong>cc</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; Cc-header value</li>
+<li><strong>bcc</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; Bcc-header value</li>
+<li><strong>attach</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; Path to files to be attached (globable)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.globals.SendKeypressCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.globals.</tt><tt class="descname">SendKeypressCommand</tt><big>(</big><em>key</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.globals.SendKeypressCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>send a keypress to the main widget to be processed by urwid</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-alot.commands.envelope">
+<span id="envelope"></span><h2>Envelope<a class="headerlink" href="#module-alot.commands.envelope" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="alot.commands.envelope.AttachCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.envelope.</tt><tt class="descname">AttachCommand</tt><big>(</big><em>path=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.envelope.AttachCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>attach files to the mail</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; files to attach (globable string)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.envelope.RefineCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.envelope.</tt><tt class="descname">RefineCommand</tt><big>(</big><em>key=''</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.envelope.RefineCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>prompt to change the value of a header</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; key of the header to change</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.envelope.SaveCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.envelope.</tt><tt class="descname">SaveCommand</tt><big>(</big><em>prehook=None</em>, <em>posthook=None</em><big>)</big><a class="headerlink" href="#alot.commands.envelope.SaveCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>save draft</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prehook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly before
+applying this command</li>
+<li><strong>posthook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly after
+applying this command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.envelope.SendCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.envelope.</tt><tt class="descname">SendCommand</tt><big>(</big><em>prehook=None</em>, <em>posthook=None</em><big>)</big><a class="headerlink" href="#alot.commands.envelope.SendCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>send mail</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prehook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly before
+applying this command</li>
+<li><strong>posthook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly after
+applying this command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.envelope.EditCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.envelope.</tt><tt class="descname">EditCommand</tt><big>(</big><em>envelope=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.envelope.EditCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>edit mail</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>envelope</strong> (<a class="reference internal" href="database.html#alot.message.Envelope" title="alot.message.Envelope"><tt class="xref py py-class docutils literal"><span class="pre">Envelope</span></tt></a>) &#8211; email to edit</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.envelope.SetCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.envelope.</tt><tt class="descname">SetCommand</tt><big>(</big><em>key</em>, <em>value</em>, <em>append=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.envelope.SetCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>set header value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; key of the header to change</li>
+<li><strong>value</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; new value</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.envelope.UnsetCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.envelope.</tt><tt class="descname">UnsetCommand</tt><big>(</big><em>key</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.envelope.UnsetCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove header field</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; key of the header to remove</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.envelope.ToggleHeaderCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.envelope.</tt><tt class="descname">ToggleHeaderCommand</tt><big>(</big><em>prehook=None</em>, <em>posthook=None</em><big>)</big><a class="headerlink" href="#alot.commands.envelope.ToggleHeaderCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>toggle display of all headers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prehook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly before
+applying this command</li>
+<li><strong>posthook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly after
+applying this command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-alot.commands.bufferlist">
+<span id="bufferlist"></span><h2>Bufferlist<a class="headerlink" href="#module-alot.commands.bufferlist" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="alot.commands.bufferlist.BufferFocusCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.bufferlist.</tt><tt class="descname">BufferFocusCommand</tt><big>(</big><em>prehook=None</em>, <em>posthook=None</em><big>)</big><a class="headerlink" href="#alot.commands.bufferlist.BufferFocusCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>focus selected buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prehook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly before
+applying this command</li>
+<li><strong>posthook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly after
+applying this command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.bufferlist.BufferCloseCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.bufferlist.</tt><tt class="descname">BufferCloseCommand</tt><big>(</big><em>prehook=None</em>, <em>posthook=None</em><big>)</big><a class="headerlink" href="#alot.commands.bufferlist.BufferCloseCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>close focussed buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prehook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly before
+applying this command</li>
+<li><strong>posthook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly after
+applying this command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-alot.commands.search">
+<span id="search"></span><h2>Search<a class="headerlink" href="#module-alot.commands.search" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="alot.commands.search.OpenThreadCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.search.</tt><tt class="descname">OpenThreadCommand</tt><big>(</big><em>thread=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.search.OpenThreadCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>open thread in a new buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>thread</strong> (<a class="reference internal" href="database.html#alot.db.Thread" title="alot.db.Thread"><tt class="xref py py-class docutils literal"><span class="pre">Thread</span></tt></a>) &#8211; thread to open (Uses focussed thread if unset)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.search.RefineCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.search.</tt><tt class="descname">RefineCommand</tt><big>(</big><em>query=None</em>, <em>sort=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.search.RefineCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>refine the querystring of this buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>query</strong> (<em>list of str</em>) &#8211; new querystring given as list of strings as returned by
+argparse</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.search.RefinePromptCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.search.</tt><tt class="descname">RefinePromptCommand</tt><big>(</big><em>prehook=None</em>, <em>posthook=None</em><big>)</big><a class="headerlink" href="#alot.commands.search.RefinePromptCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>prompt to change this buffers querystring</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prehook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly before
+applying this command</li>
+<li><strong>posthook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly after
+applying this command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.search.RetagPromptCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.search.</tt><tt class="descname">RetagPromptCommand</tt><big>(</big><em>prehook=None</em>, <em>posthook=None</em><big>)</big><a class="headerlink" href="#alot.commands.search.RetagPromptCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>prompt to retag selected threads&#8217; tags</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prehook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly before
+applying this command</li>
+<li><strong>posthook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly after
+applying this command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.search.TagCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.search.</tt><tt class="descname">TagCommand</tt><big>(</big><em>tags=u''</em>, <em>action='add'</em>, <em>all=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.search.TagCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>manipulate message tags</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tags</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; comma separated list of tagstrings to set</li>
+<li><strong>all</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; tag all messages in thread</li>
+<li><strong>action</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; adds tags if &#8216;add&#8217;, removes them if &#8216;remove&#8217;, adds tags
+and removes all other if &#8216;set&#8217; or toggle individually if
+&#8216;toggle&#8217;</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-alot.commands.taglist">
+<span id="taglist"></span><h2>Taglist<a class="headerlink" href="#module-alot.commands.taglist" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="alot.commands.taglist.TaglistSelectCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.taglist.</tt><tt class="descname">TaglistSelectCommand</tt><big>(</big><em>prehook=None</em>, <em>posthook=None</em><big>)</big><a class="headerlink" href="#alot.commands.taglist.TaglistSelectCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>search for messages with selected tag</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prehook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly before
+applying this command</li>
+<li><strong>posthook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly after
+applying this command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-alot.commands.thread">
+<span id="thread"></span><h2>Thread<a class="headerlink" href="#module-alot.commands.thread" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="alot.commands.thread.ReplyCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.thread.</tt><tt class="descname">ReplyCommand</tt><big>(</big><em>message=None</em>, <em>all=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.thread.ReplyCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>reply to message</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>message</strong> (<cite>alot.message.Message</cite>) &#8211; message to reply to (defaults to selected message)</li>
+<li><strong>all</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; group reply; copies recipients from Bcc/Cc/To to the reply</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.thread.ForwardCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.thread.</tt><tt class="descname">ForwardCommand</tt><big>(</big><em>message=None</em>, <em>attach=True</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.thread.ForwardCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>forward message</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>message</strong> (<cite>alot.message.Message</cite>) &#8211; message to forward (defaults to selected message)</li>
+<li><strong>attach</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; attach original mail instead of inline quoting its body</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.thread.EditNewCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.thread.</tt><tt class="descname">EditNewCommand</tt><big>(</big><em>message=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.thread.EditNewCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>edit message in as new</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>message</strong> (<cite>alot.message.Message</cite>) &#8211; message to reply to (defaults to selected message)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.thread.ChangeDisplaymodeCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.thread.</tt><tt class="descname">ChangeDisplaymodeCommand</tt><big>(</big><em>all=False</em>, <em>visible=None</em>, <em>raw=None</em>, <em>all_headers=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.thread.ChangeDisplaymodeCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>fold or unfold messages</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>all</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; toggle all, not only selected message</li>
+<li><strong>visible</strong> (<em>True, False, &#8216;toggle&#8217; or None</em>) &#8211; unfold if <cite>True</cite>, fold if <cite>False</cite>, ignore if <cite>None</cite></li>
+<li><strong>raw</strong> (<em>True, False, &#8216;toggle&#8217; or None</em>) &#8211; display raw message text.</li>
+<li><strong>all_headers</strong> (<em>True, False, &#8216;toggle&#8217; or None</em>) &#8211; show all headers (only visible if not in raw mode)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.thread.PipeCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.thread.</tt><tt class="descname">PipeCommand</tt><big>(</big><em>cmd</em>, <em>all=False</em>, <em>separately=False</em>, <em>background=False</em>, <em>format='raw'</em>, <em>noop_msg='no command specified'</em>, <em>confirm_msg=''</em>, <em>done_msg='done'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.thread.PipeCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>pipe message(s) to stdin of a shellcommand</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cmd</strong> (<em>str or list of str</em>) &#8211; shellcommand to open</li>
+<li><strong>all</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; pipe all, not only selected message</li>
+<li><strong>separately</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; call command once per message</li>
+<li><strong>background</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; disable stdin and ignore sdtout of command</li>
+<li><strong>format</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; what to pipe to the processes stdin. one of:
+&#8216;raw&#8217;: message content as is,
+&#8216;decoded&#8217;: message content, decoded quoted printable,
+&#8216;id&#8217;: message ids, separated by newlines,
+&#8216;filepath&#8217;: paths to message files on disk</li>
+<li><strong>noop_msg</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; error notification to show if <cite>cmd</cite> is empty</li>
+<li><strong>confirm_msg</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; confirmation question to ask (continues directly if
+unset)</li>
+<li><strong>done_msg</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; notification message to show upon success</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.thread.RemoveCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.thread.</tt><tt class="descname">RemoveCommand</tt><big>(</big><em>all=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.thread.RemoveCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove message(s) from the index</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>all</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; remove all messages from thread, not just selected one</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.thread.PrintCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.thread.</tt><tt class="descname">PrintCommand</tt><big>(</big><em>all=False</em>, <em>separately=False</em>, <em>raw=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.thread.PrintCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>print message(s)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>all</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; print all, not only selected messages</li>
+<li><strong>separately</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; call print command once per message</li>
+<li><strong>raw</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; pipe raw message string to print command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.thread.SaveAttachmentCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.thread.</tt><tt class="descname">SaveAttachmentCommand</tt><big>(</big><em>all=False</em>, <em>path=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.thread.SaveAttachmentCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>save attachment(s)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>all</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; save all, not only selected attachment</li>
+<li><strong>path</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; path to write to. if <cite>all</cite> is set, this must be a
+directory.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.thread.OpenAttachmentCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.thread.</tt><tt class="descname">OpenAttachmentCommand</tt><big>(</big><em>attachment</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.thread.OpenAttachmentCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>displays an attachment according to mailcap</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>attachment</strong> (<a class="reference internal" href="database.html#alot.message.Attachment" title="alot.message.Attachment"><tt class="xref py py-class docutils literal"><span class="pre">Attachment</span></tt></a>) &#8211; attachment to open</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.thread.ThreadSelectCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.thread.</tt><tt class="descname">ThreadSelectCommand</tt><big>(</big><em>prehook=None</em>, <em>posthook=None</em><big>)</big><a class="headerlink" href="#alot.commands.thread.ThreadSelectCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>select focussed element. The fired action depends on the focus:
+- if message summary, this toggles visibility of the message,
+- if attachment line, this opens the attachment</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prehook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly before
+applying this command</li>
+<li><strong>posthook</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; name of the hook to call directly after
+applying this command</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.commands.thread.TagCommand">
+<em class="property">class </em><tt class="descclassname">alot.commands.thread.</tt><tt class="descname">TagCommand</tt><big>(</big><em>tags=u''</em>, <em>action='add'</em>, <em>all=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.commands.thread.TagCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>manipulate message tags</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tags</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; comma separated list of tagstrings to set</li>
+<li><strong>all</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; tag all messages in thread</li>
+<li><strong>action</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; adds tags if &#8216;add&#8217;, removes them if &#8216;remove&#8217;, adds tags
+and removes all other if &#8216;set&#8217; or toggle individually if
+&#8216;toggle&#8217;</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Commands</a><ul>
+<li><a class="reference internal" href="#module-alot.commands.globals">Globals</a></li>
+<li><a class="reference internal" href="#module-alot.commands.envelope">Envelope</a></li>
+<li><a class="reference internal" href="#module-alot.commands.bufferlist">Bufferlist</a></li>
+<li><a class="reference internal" href="#module-alot.commands.search">Search</a></li>
+<li><a class="reference internal" href="#module-alot.commands.taglist">Taglist</a></li>
+<li><a class="reference internal" href="#module-alot.commands.thread">Thread</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="utils.html"
+                        title="previous chapter">Utils</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="utils.html" title="Utils"
+             >previous</a> |</li>
+        <li><a href="index.html">alot v0.2-324-g5224 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011 Patrick Totzke.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

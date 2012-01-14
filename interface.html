@@ -1,0 +1,759 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>User Interface &mdash; alot v0.2-324-g5224 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.2-324-g5224',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="alot v0.2-324-g5224 documentation" href="index.html" />
+    <link rel="next" title="Accessing User Settings" href="settings.html" />
+    <link rel="prev" title="Email Database" href="database.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="settings.html" title="Accessing User Settings"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="database.html" title="Email Database"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">alot v0.2-324-g5224 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="user-interface">
+<h1>User Interface<a class="headerlink" href="#user-interface" title="Permalink to this headline">¶</a></h1>
+<p>Alot sets up a widget tree and an <a class="reference external" href="http://urwid.readthedocs.org/en/latest/reference/main_loop.html#urwid.main_loop.TwistedEventLoop" title="(in urwid v1.0)"><tt class="xref py py-class docutils literal"><span class="pre">mainloop</span></tt></a>
+in the constructor of <a class="reference internal" href="#alot.ui.UI" title="alot.ui.UI"><tt class="xref py py-class docutils literal"><span class="pre">alot.ui.UI</span></tt></a>. The visible area is
+a <tt class="xref py py-class docutils literal"><span class="pre">urwid.Frame</span></tt>, where the footer is used as a status line and the body part
+displays the currently active <a class="reference internal" href="#alot.buffers.Buffer" title="alot.buffers.Buffer"><tt class="xref py py-class docutils literal"><span class="pre">alot.buffers.Buffer</span></tt></a>.</p>
+<p>To be able to bind keystrokes and translate them to <a class="reference internal" href="commands.html#alot.commands.Command" title="alot.commands.Command"><tt class="xref py py-class docutils literal"><span class="pre">Commands</span></tt></a>, keypresses are <em>not</em> propagated down the widget tree as is
+customary in urwid. Instead, the root widget given to urwids mainloop is a custom wrapper
+(<tt class="xref py py-class docutils literal"><span class="pre">alot.ui.Inputwrap</span></tt>) that interprets key presses. A dedicated
+<a class="reference internal" href="commands.html#alot.commands.globals.SendKeypressCommand" title="alot.commands.globals.SendKeypressCommand"><tt class="xref py py-class docutils literal"><span class="pre">SendKeypressCommand</span></tt></a> can be used to trigger
+key presses to the wrapped root widget and thereby accessing standard urwid
+behaviour.</p>
+<p>In order to keep the interface non-blocking, alot makes use of twisted&#8217;s <a class="reference external" href="http://twistedmatrix.com/documents/current/core/howto/defer.html">deferred</a> - a
+framework that makes it easy to deal with callbacks. Many commands in alot make use of
+<a class="reference external" href="http://twistedmatrix.com/documents/8.1.0/api/twisted.internet.defer.html#inlineCallbacks">inline callbacks</a>, which allow you to treat deferred-returning functions almost like
+syncronous functions. Consider the following example of a function that prompts for some
+input and acts on it:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">twisted.internet</span> <span class="kn">import</span> <span class="n">defer</span>
+
+<span class="nd">@defer.inlineCallbacks</span>
+<span class="k">def</span> <span class="nf">greet</span><span class="p">(</span><span class="n">ui</span><span class="p">):</span>  <span class="c"># ui is instance of alot.ui.UI</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">ui</span><span class="o">.</span><span class="n">prompt</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s">&#39;pls enter your name&gt;&#39;</span><span class="p">)</span>
+    <span class="n">ui</span><span class="o">.</span><span class="n">notify</span><span class="p">(</span><span class="s">&#39;your name is: &#39;</span> <span class="o">+</span> <span class="n">name</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="module-alot.ui">
+<span id="ui-the-main-component"></span><h2><tt class="xref py py-class docutils literal"><span class="pre">UI</span></tt> - the main component<a class="headerlink" href="#module-alot.ui" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="alot.ui.UI">
+<em class="property">class </em><tt class="descclassname">alot.ui.</tt><tt class="descname">UI</tt><big>(</big><em>dbman</em>, <em>accountman</em>, <em>initialcmd</em>, <em>colourmode</em><big>)</big><a class="headerlink" href="#alot.ui.UI" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class integrates all components of alot and offers
+methods for user interaction like <a class="reference internal" href="#alot.ui.UI.prompt" title="alot.ui.UI.prompt"><tt class="xref py py-meth docutils literal"><span class="pre">prompt()</span></tt></a>, <a class="reference internal" href="#alot.ui.UI.notify" title="alot.ui.UI.notify"><tt class="xref py py-meth docutils literal"><span class="pre">notify()</span></tt></a> etc.
+It handles the urwid widget tree and mainloop (we use twisted) and is
+responsible for opening, closing and focussing buffers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dbman</strong> &#8211; <a class="reference internal" href="database.html#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager</span></tt></a></li>
+<li><strong>accountman</strong> &#8211; <a class="reference internal" href="accounts.html#alot.account.AccountManager" title="alot.account.AccountManager"><tt class="xref py py-class docutils literal"><span class="pre">AccountManager</span></tt></a></li>
+<li><strong>initialcmd</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; commandline applied after setting up interface</li>
+<li><strong>colourmode</strong> (<em>int in [1,16,256]</em>) &#8211; determines which theme to chose</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="alot.ui.UI.buffers">
+<tt class="descname">buffers</tt><a class="headerlink" href="#alot.ui.UI.buffers" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of active buffers</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="alot.ui.UI.current_buffer">
+<tt class="descname">current_buffer</tt><a class="headerlink" href="#alot.ui.UI.current_buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>points to currently active <a class="reference internal" href="#alot.buffers.Buffer" title="alot.buffers.Buffer"><tt class="xref py py-class docutils literal"><span class="pre">Buffer</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="alot.ui.UI.dbman">
+<tt class="descname">dbman</tt><a class="headerlink" href="#alot.ui.UI.dbman" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database manager (<a class="reference internal" href="database.html#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager</span></tt></a>)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="alot.ui.UI.accountman">
+<tt class="descname">accountman</tt><a class="headerlink" href="#alot.ui.UI.accountman" title="Permalink to this definition">¶</a></dt>
+<dd><p>account manager (<a class="reference internal" href="accounts.html#alot.account.AccountManager" title="alot.account.AccountManager"><tt class="xref py py-class docutils literal"><span class="pre">AccountManager</span></tt></a>)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.ui.UI.apply_command">
+<tt class="descname">apply_command</tt><big>(</big><em>cmd</em><big>)</big><a class="headerlink" href="#alot.ui.UI.apply_command" title="Permalink to this definition">¶</a></dt>
+<dd><p>applies a command</p>
+<p>This calls the pre and post hooks attached to the command,
+as well as <tt class="xref py py-meth docutils literal"><span class="pre">cmd.apply()</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cmd</strong> (<a class="reference internal" href="commands.html#alot.commands.Command" title="alot.commands.Command"><tt class="xref py py-class docutils literal"><span class="pre">Command</span></tt></a>) &#8211; an applicable command</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.ui.UI.prompt">
+<tt class="descname">prompt</tt><big>(</big><em>prefix='&gt;'</em>, <em>text=u''</em>, <em>completer=None</em>, <em>tab=0</em>, <em>history=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#alot.ui.UI.prompt" title="Permalink to this definition">¶</a></dt>
+<dd><p>prompt for text input</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>prefix</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; text to print before the input field</li>
+<li><strong>text</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; initial content of the input field</li>
+<li><strong>completer</strong> (<a class="reference internal" href="#alot.completion.Completer" title="alot.completion.Completer"><tt class="xref py py-meth docutils literal"><span class="pre">alot.completion.Completer()</span></tt></a>) &#8211; completion object to use</li>
+<li><strong>tab</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#int" title="(in Python v3.2)"><em>int</em></a>) &#8211; number of tabs to press initially
+(to select completion results)</li>
+<li><strong>history</strong> (<em>list of str</em>) &#8211; history to be used for up/down keys</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a <tt class="xref py py-class docutils literal"><span class="pre">twisted.defer.Deferred</span></tt></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.ui.UI.choice">
+<tt class="descname">choice</tt><big>(</big><em>message</em>, <em>choices={'y': 'yes'</em>, <em>'n': 'no'}</em>, <em>select=None</em>, <em>cancel=None</em>, <em>msg_position='above'</em><big>)</big><a class="headerlink" href="#alot.ui.UI.choice" title="Permalink to this definition">¶</a></dt>
+<dd><p>prompt user to make a choice</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>message</strong> (<em>unicode</em>) &#8211; string to display before list of choices</li>
+<li><strong>choices</strong> (<em>dict: keymap-&gt;choice (both str)</em>) &#8211; dict of possible choices</li>
+<li><strong>select</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; choice to return if enter/return is hit. Ignored if set
+to <cite>None</cite>.</li>
+<li><strong>cancel</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; choice to return if escape is hit. Ignored if set to
+<cite>None</cite>.</li>
+<li><strong>msg_position</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; determines if <cite>message</cite> is above or left of the
+prompt. Must be <cite>above</cite> or <cite>left</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a <tt class="xref py py-class docutils literal"><span class="pre">twisted.defer.Deferred</span></tt></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.ui.UI.notify">
+<tt class="descname">notify</tt><big>(</big><em>message</em>, <em>priority='normal'</em>, <em>timeout=0</em>, <em>block=False</em><big>)</big><a class="headerlink" href="#alot.ui.UI.notify" title="Permalink to this definition">¶</a></dt>
+<dd><p>opens notification popup</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>message</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; message to print</li>
+<li><strong>priority</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; priority string, used to format the popup: currently,
+&#8216;normal&#8217; and &#8216;error&#8217; are defined. If you use &#8216;X&#8217; here,
+the attribute &#8216;global_notify_X&#8217; is used to format the
+popup.</li>
+<li><strong>timeout</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#int" title="(in Python v3.2)"><em>int</em></a>) &#8211; seconds until message disappears. Defaults to the value
+of &#8216;notify_timeout&#8217; in the general config section.
+A negative value means never time out.</li>
+<li><strong>block</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; this notification blocks until a keypress is made</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an urwid widget (this notification) that can be handed to
+<a class="reference internal" href="#alot.ui.UI.clear_notify" title="alot.ui.UI.clear_notify"><tt class="xref py py-meth docutils literal"><span class="pre">clear_notify()</span></tt></a> for removal</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.ui.UI.clear_notify">
+<tt class="descname">clear_notify</tt><big>(</big><em>messages</em><big>)</big><a class="headerlink" href="#alot.ui.UI.clear_notify" title="Permalink to this definition">¶</a></dt>
+<dd><p>clears notification popups. Call this to ged rid of messages that don&#8217;t
+time out.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>messages</strong> &#8211; The popups to remove. This should be exactly
+what <a class="reference internal" href="#alot.ui.UI.notify" title="alot.ui.UI.notify"><tt class="xref py py-meth docutils literal"><span class="pre">notify()</span></tt></a> returned when creating the popup</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.ui.UI.buffer_open">
+<tt class="descname">buffer_open</tt><big>(</big><em>buf</em><big>)</big><a class="headerlink" href="#alot.ui.UI.buffer_open" title="Permalink to this definition">¶</a></dt>
+<dd><p>register and focus new <a class="reference internal" href="#alot.buffers.Buffer" title="alot.buffers.Buffer"><tt class="xref py py-class docutils literal"><span class="pre">Buffer</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.ui.UI.buffer_focus">
+<tt class="descname">buffer_focus</tt><big>(</big><em>buf</em><big>)</big><a class="headerlink" href="#alot.ui.UI.buffer_focus" title="Permalink to this definition">¶</a></dt>
+<dd><p>focus given <a class="reference internal" href="#alot.buffers.Buffer" title="alot.buffers.Buffer"><tt class="xref py py-class docutils literal"><span class="pre">Buffer</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.ui.UI.buffer_close">
+<tt class="descname">buffer_close</tt><big>(</big><em>buf</em><big>)</big><a class="headerlink" href="#alot.ui.UI.buffer_close" title="Permalink to this definition">¶</a></dt>
+<dd><p>closes given <a class="reference internal" href="#alot.buffers.Buffer" title="alot.buffers.Buffer"><tt class="xref py py-class docutils literal"><span class="pre">Buffer</span></tt></a>.</p>
+<p>This it removes it from the bufferlist and calls its cleanup() method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.ui.UI.get_buffers_of_type">
+<tt class="descname">get_buffers_of_type</tt><big>(</big><em>t</em><big>)</big><a class="headerlink" href="#alot.ui.UI.get_buffers_of_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns currently open buffers for a given subclass of
+<tt class="xref py py-class docutils literal"><span class="pre">alot.buffer.Buffer</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="buffers">
+<h2>Buffers<a class="headerlink" href="#buffers" title="Permalink to this headline">¶</a></h2>
+<p>A buffer defines a view to your data. It knows how to render itself, to interpret
+keypresses and is visible in the &#8220;body&#8221; part of the widget frame.
+Different modes are defined by subclasses of the following base class.</p>
+<dl class="class">
+<dt id="alot.buffers.Buffer">
+<em class="property">class </em><tt class="descclassname">alot.buffers.</tt><tt class="descname">Buffer</tt><big>(</big><em>ui</em>, <em>widget</em>, <em>name</em><big>)</big><a class="headerlink" href="#alot.buffers.Buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract base class for buffers.</p>
+<dl class="method">
+<dt id="alot.buffers.Buffer.rebuild">
+<tt class="descname">rebuild</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.buffers.Buffer.rebuild" title="Permalink to this definition">¶</a></dt>
+<dd><p>tells the buffer to (re)construct its visible content.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.buffers.Buffer.cleanup">
+<tt class="descname">cleanup</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.buffers.Buffer.cleanup" title="Permalink to this definition">¶</a></dt>
+<dd><p>called before buffer is dismissed</p>
+</dd></dl>
+
+</dd></dl>
+
+<p>Available modes are:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="80%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Mode</th>
+<th class="head">Buffer Subclass</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>search</td>
+<td><a class="reference internal" href="#alot.buffers.SearchBuffer" title="alot.buffers.SearchBuffer"><tt class="xref py py-class docutils literal"><span class="pre">SearchBuffer</span></tt></a></td>
+</tr>
+<tr><td>thread</td>
+<td><a class="reference internal" href="#alot.buffers.ThreadBuffer" title="alot.buffers.ThreadBuffer"><tt class="xref py py-class docutils literal"><span class="pre">ThreadBuffer</span></tt></a></td>
+</tr>
+<tr><td>bufferlist</td>
+<td><a class="reference internal" href="#alot.buffers.BufferlistBuffer" title="alot.buffers.BufferlistBuffer"><tt class="xref py py-class docutils literal"><span class="pre">BufferlistBuffer</span></tt></a></td>
+</tr>
+<tr><td>taglist</td>
+<td><a class="reference internal" href="#alot.buffers.TagListBuffer" title="alot.buffers.TagListBuffer"><tt class="xref py py-class docutils literal"><span class="pre">TagListBuffer</span></tt></a></td>
+</tr>
+<tr><td>envelope</td>
+<td><a class="reference internal" href="#alot.buffers.EnvelopeBuffer" title="alot.buffers.EnvelopeBuffer"><tt class="xref py py-class docutils literal"><span class="pre">EnvelopeBuffer</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="module-alot.buffers"></span><dl class="class">
+<dt id="alot.buffers.BufferlistBuffer">
+<em class="property">class </em><tt class="descclassname">alot.buffers.</tt><tt class="descname">BufferlistBuffer</tt><big>(</big><em>ui</em>, <em>filtfun=None</em><big>)</big><a class="headerlink" href="#alot.buffers.BufferlistBuffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>selectable list of active buffers</p>
+<dl class="method">
+<dt id="alot.buffers.BufferlistBuffer.index_of">
+<tt class="descname">index_of</tt><big>(</big><em>b</em><big>)</big><a class="headerlink" href="#alot.buffers.BufferlistBuffer.index_of" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the index of <a class="reference internal" href="#alot.buffers.Buffer" title="alot.buffers.Buffer"><tt class="xref py py-class docutils literal"><span class="pre">Buffer</span></tt></a> <cite>b</cite> in the global list of active
+buffers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.buffers.BufferlistBuffer.get_selected_buffer">
+<tt class="descname">get_selected_buffer</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.buffers.BufferlistBuffer.get_selected_buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns currently selected <a class="reference internal" href="#alot.buffers.Buffer" title="alot.buffers.Buffer"><tt class="xref py py-class docutils literal"><span class="pre">Buffer</span></tt></a> element from list</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.buffers.EnvelopeBuffer">
+<em class="property">class </em><tt class="descclassname">alot.buffers.</tt><tt class="descname">EnvelopeBuffer</tt><big>(</big><em>ui</em>, <em>envelope</em><big>)</big><a class="headerlink" href="#alot.buffers.EnvelopeBuffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>message composition mode</p>
+<dl class="method">
+<dt id="alot.buffers.EnvelopeBuffer.toggle_all_headers">
+<tt class="descname">toggle_all_headers</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.buffers.EnvelopeBuffer.toggle_all_headers" title="Permalink to this definition">¶</a></dt>
+<dd><p>toggles visibility of all envelope headers</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.buffers.SearchBuffer">
+<em class="property">class </em><tt class="descclassname">alot.buffers.</tt><tt class="descname">SearchBuffer</tt><big>(</big><em>ui</em>, <em>initialquery=''</em>, <em>sort_order=None</em><big>)</big><a class="headerlink" href="#alot.buffers.SearchBuffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>shows a result set for a Thread query, one line per
+<a class="reference internal" href="database.html#alot.db.Thread" title="alot.db.Thread"><tt class="xref py py-class docutils literal"><span class="pre">Thread</span></tt></a></p>
+<dl class="method">
+<dt id="alot.buffers.SearchBuffer.kill_filler_process">
+<tt class="descname">kill_filler_process</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.buffers.SearchBuffer.kill_filler_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>terminates the process that fills this buffers
+<tt class="xref py py-class docutils literal"><span class="pre">PipeWalker</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.buffers.SearchBuffer.get_selected_threadline">
+<tt class="descname">get_selected_threadline</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.buffers.SearchBuffer.get_selected_threadline" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns curently focussed <tt class="xref py py-class docutils literal"><span class="pre">alot.widgets.ThreadlineWidget</span></tt>
+from the result list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.buffers.SearchBuffer.get_selected_thread">
+<tt class="descname">get_selected_thread</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.buffers.SearchBuffer.get_selected_thread" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns currently selected <a class="reference internal" href="database.html#alot.db.Thread" title="alot.db.Thread"><tt class="xref py py-class docutils literal"><span class="pre">Thread</span></tt></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.buffers.ThreadBuffer">
+<em class="property">class </em><tt class="descclassname">alot.buffers.</tt><tt class="descname">ThreadBuffer</tt><big>(</big><em>ui</em>, <em>thread</em><big>)</big><a class="headerlink" href="#alot.buffers.ThreadBuffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>shows a single mailthread as a (collapsible) tree of
+<tt class="xref py py-class docutils literal"><span class="pre">MessageWidgets</span></tt>.</p>
+<dl class="method">
+<dt id="alot.buffers.ThreadBuffer.get_selected_thread">
+<tt class="descname">get_selected_thread</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.buffers.ThreadBuffer.get_selected_thread" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the displayed <a class="reference internal" href="database.html#alot.db.Thread" title="alot.db.Thread"><tt class="xref py py-class docutils literal"><span class="pre">Thread</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.buffers.ThreadBuffer.get_selection">
+<tt class="descname">get_selection</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.buffers.ThreadBuffer.get_selection" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns focussed <tt class="xref py py-class docutils literal"><span class="pre">MessageWidget</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.buffers.ThreadBuffer.get_messagewidgets">
+<tt class="descname">get_messagewidgets</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.buffers.ThreadBuffer.get_messagewidgets" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns all message widgets contained in this list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.buffers.ThreadBuffer.get_selected_message">
+<tt class="descname">get_selected_message</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.buffers.ThreadBuffer.get_selected_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns focussed <a class="reference internal" href="database.html#alot.message.Message" title="alot.message.Message"><tt class="xref py py-class docutils literal"><span class="pre">Message</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.buffers.ThreadBuffer.get_message_widgets">
+<tt class="descname">get_message_widgets</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.buffers.ThreadBuffer.get_message_widgets" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns all <tt class="xref py py-class docutils literal"><span class="pre">MessageWidgets</span></tt>
+displayed in this thread-tree.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.buffers.ThreadBuffer.unfold_matching">
+<tt class="descname">unfold_matching</tt><big>(</big><em>querystring</em><big>)</big><a class="headerlink" href="#alot.buffers.ThreadBuffer.unfold_matching" title="Permalink to this definition">¶</a></dt>
+<dd><p>unfolds those <tt class="xref py py-class docutils literal"><span class="pre">MessageWidgets</span></tt>
+that represent <a class="reference internal" href="database.html#alot.message.Message" title="alot.message.Message"><tt class="xref py py-class docutils literal"><span class="pre">Messages</span></tt></a> matching
+<cite>querystring</cite>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.buffers.TagListBuffer">
+<em class="property">class </em><tt class="descclassname">alot.buffers.</tt><tt class="descname">TagListBuffer</tt><big>(</big><em>ui</em>, <em>alltags=</em><span class="optional">[</span><span class="optional">]</span>, <em>filtfun=None</em><big>)</big><a class="headerlink" href="#alot.buffers.TagListBuffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>selectable list of tagstrings present in the database</p>
+<dl class="method">
+<dt id="alot.buffers.TagListBuffer.get_selected_tag">
+<tt class="descname">get_selected_tag</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.buffers.TagListBuffer.get_selected_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns selected tagstring</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="widgets">
+<h2>Widgets<a class="headerlink" href="#widgets" title="Permalink to this headline">¶</a></h2>
+<p>What follows is a list of the non-standard urwid widgets used in alot.
+Some of them respect <a class="reference internal" href="settings.html"><em>user settings</em></a>, themes in particular.</p>
+<span class="target" id="module-alot.widgets"></span></div>
+<div class="section" id="completion">
+<h2>Completion<a class="headerlink" href="#completion" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#alot.ui.UI.prompt" title="alot.ui.UI.prompt"><tt class="xref py py-meth docutils literal"><span class="pre">alot.ui.UI.prompt()</span></tt></a> allows tab completion using a <a class="reference internal" href="#alot.completion.Completer" title="alot.completion.Completer"><tt class="xref py py-class docutils literal"><span class="pre">Completer</span></tt></a>
+object handed as &#8216;completer&#8217; parameter. <a class="reference internal" href="#module-alot.completion" title="alot.completion"><tt class="xref py py-mod docutils literal"><span class="pre">alot.completion</span></tt></a> defines several
+subclasses for different occasions like completing email addresses from an
+<a class="reference internal" href="accounts.html#alot.account.AddressBook" title="alot.account.AddressBook"><tt class="xref py py-class docutils literal"><span class="pre">AddressBook</span></tt></a>, notmuch tagstrings. Some of these actually build on top
+of each other; the <a class="reference internal" href="#alot.completion.QueryCompleter" title="alot.completion.QueryCompleter"><tt class="xref py py-class docutils literal"><span class="pre">QueryCompleter</span></tt></a> for example uses a
+<a class="reference internal" href="#alot.completion.TagsCompleter" title="alot.completion.TagsCompleter"><tt class="xref py py-class docutils literal"><span class="pre">TagsCompleter</span></tt></a> internally to allow tagstring completion after
+&#8220;is:&#8221; or &#8220;tag:&#8221; keywords when typing a notmuch querystring.</p>
+<p>All these classes overide the method <a class="reference internal" href="#alot.completion.Completer.complete" title="alot.completion.Completer.complete"><tt class="xref py py-class docutils literal"><span class="pre">complete</span></tt></a>, which
+for a given string and cursor position in that string returns
+a list of tuples <cite>(completed_string, new_cursor_position)</cite> that are taken to be
+the completed values. Note that <cite>completed_string</cite> does not need to have the original
+string as prefix.</p>
+<span class="target" id="module-alot.completion"></span><dl class="class">
+<dt id="alot.completion.Completer">
+<em class="property">class </em><tt class="descclassname">alot.completion.</tt><tt class="descname">Completer</tt><a class="headerlink" href="#alot.completion.Completer" title="Permalink to this definition">¶</a></dt>
+<dd><p>base class for completers</p>
+<dl class="method">
+<dt id="alot.completion.Completer.complete">
+<tt class="descname">complete</tt><big>(</big><em>original</em>, <em>pos</em><big>)</big><a class="headerlink" href="#alot.completion.Completer.complete" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a list of completions and cursor positions for the
+string original from position pos on.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>original</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; the string to complete</li>
+<li><strong>pos</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#int" title="(in Python v3.2)"><em>int</em></a>) &#8211; starting position to complete from</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">pairs of completed string and cursor position in the
+new string</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of (str, int)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.completion.Completer.relevant_part">
+<tt class="descname">relevant_part</tt><big>(</big><em>original</em>, <em>pos</em>, <em>sep=' '</em><big>)</big><a class="headerlink" href="#alot.completion.Completer.relevant_part" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates the subword in a <cite>sep</cite>-splitted list of substrings of
+<cite>original</cite> that <cite>pos</cite> is ia.n</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.completion.StringlistCompleter">
+<em class="property">class </em><tt class="descclassname">alot.completion.</tt><tt class="descname">StringlistCompleter</tt><big>(</big><em>resultlist</em><big>)</big><a class="headerlink" href="#alot.completion.StringlistCompleter" title="Permalink to this definition">¶</a></dt>
+<dd><p>completer for a fixed list of strings</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>resultlist</strong> &#8211; strings used for completion</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.completion.MultipleSelectionCompleter">
+<em class="property">class </em><tt class="descclassname">alot.completion.</tt><tt class="descname">MultipleSelectionCompleter</tt><big>(</big><em>completer</em>, <em>separator='</em>, <em>'</em><big>)</big><a class="headerlink" href="#alot.completion.MultipleSelectionCompleter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Meta-Completer that turns any Completer into one that deals with a list of
+completion strings using the wrapped Completer.
+This allows for example to easily construct a completer for comma separated
+recipient-lists using a <a class="reference internal" href="#alot.completion.ContactsCompleter" title="alot.completion.ContactsCompleter"><tt class="xref py py-class docutils literal"><span class="pre">ContactsCompleter</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>completer</strong> (<em>Completer</em>) &#8211; completer to use for individual substrings</li>
+<li><strong>separator</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; separator used to split the completion string into
+substrings to be fed to <cite>completer</cite>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="alot.completion.MultipleSelectionCompleter.relevant_part">
+<tt class="descname">relevant_part</tt><big>(</big><em>original</em>, <em>pos</em><big>)</big><a class="headerlink" href="#alot.completion.MultipleSelectionCompleter.relevant_part" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates the subword of <cite>original</cite> that <cite>pos</cite> is in</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.completion.QueryCompleter">
+<em class="property">class </em><tt class="descclassname">alot.completion.</tt><tt class="descname">QueryCompleter</tt><big>(</big><em>dbman</em>, <em>accountman</em><big>)</big><a class="headerlink" href="#alot.completion.QueryCompleter" title="Permalink to this definition">¶</a></dt>
+<dd><p>completion for a notmuch query string</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dbman</strong> (<a class="reference internal" href="database.html#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager</span></tt></a>) &#8211; used to look up avaliable tagstrings</li>
+<li><strong>accountman</strong> (<a class="reference internal" href="accounts.html#alot.account.AccountManager" title="alot.account.AccountManager"><tt class="xref py py-class docutils literal"><span class="pre">AccountManager</span></tt></a>) &#8211; used to look up known addresses to complete &#8216;from&#8217;
+and &#8216;to&#8217; queries</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.completion.TagCompleter">
+<em class="property">class </em><tt class="descclassname">alot.completion.</tt><tt class="descname">TagCompleter</tt><big>(</big><em>dbman</em><big>)</big><a class="headerlink" href="#alot.completion.TagCompleter" title="Permalink to this definition">¶</a></dt>
+<dd><p>complete a tagstring</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dbman</strong> (<a class="reference internal" href="database.html#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager</span></tt></a>) &#8211; used to look up avaliable tagstrings</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.completion.TagsCompleter">
+<em class="property">class </em><tt class="descclassname">alot.completion.</tt><tt class="descname">TagsCompleter</tt><big>(</big><em>dbman</em><big>)</big><a class="headerlink" href="#alot.completion.TagsCompleter" title="Permalink to this definition">¶</a></dt>
+<dd><p>completion for a comma separated list of tagstrings</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dbman</strong> (<a class="reference internal" href="database.html#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager</span></tt></a>) &#8211; used to look up avaliable tagstrings</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.completion.ContactsCompleter">
+<em class="property">class </em><tt class="descclassname">alot.completion.</tt><tt class="descname">ContactsCompleter</tt><big>(</big><em>abooks</em>, <em>addressesonly=False</em><big>)</big><a class="headerlink" href="#alot.completion.ContactsCompleter" title="Permalink to this definition">¶</a></dt>
+<dd><p>completes contacts from given address books</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>abooks</strong> (list of <tt class="xref py py-class docutils literal"><span class="pre">AddresBook</span></tt>) &#8211; used to look up email addresses</li>
+<li><strong>addressesonly</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; only insert address, not the realname of the
+contact</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.completion.AbooksCompleter">
+<em class="property">class </em><tt class="descclassname">alot.completion.</tt><tt class="descname">AbooksCompleter</tt><big>(</big><em>abooks</em>, <em>addressesonly=False</em><big>)</big><a class="headerlink" href="#alot.completion.AbooksCompleter" title="Permalink to this definition">¶</a></dt>
+<dd><p>completes a contact from given address books</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>abooks</strong> (list of <tt class="xref py py-class docutils literal"><span class="pre">AddresBook</span></tt>) &#8211; used to look up email addresses</li>
+<li><strong>addressesonly</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; only insert address, not the realname of the
+contact</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.completion.AccountCompleter">
+<em class="property">class </em><tt class="descclassname">alot.completion.</tt><tt class="descname">AccountCompleter</tt><big>(</big><em>accountman</em><big>)</big><a class="headerlink" href="#alot.completion.AccountCompleter" title="Permalink to this definition">¶</a></dt>
+<dd><p>completes users&#8217; own mailaddresses</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>accountman</strong> (<a class="reference internal" href="accounts.html#alot.account.AccountManager" title="alot.account.AccountManager"><tt class="xref py py-class docutils literal"><span class="pre">AccountManager</span></tt></a>) &#8211; used to look up the list of addresses</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.completion.CommandCompleter">
+<em class="property">class </em><tt class="descclassname">alot.completion.</tt><tt class="descname">CommandCompleter</tt><big>(</big><em>mode</em><big>)</big><a class="headerlink" href="#alot.completion.CommandCompleter" title="Permalink to this definition">¶</a></dt>
+<dd><p>completes commands</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mode</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; mode identifier</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.completion.CommandLineCompleter">
+<em class="property">class </em><tt class="descclassname">alot.completion.</tt><tt class="descname">CommandLineCompleter</tt><big>(</big><em>dbman</em>, <em>accountman</em>, <em>mode</em>, <em>currentbuffer=None</em><big>)</big><a class="headerlink" href="#alot.completion.CommandLineCompleter" title="Permalink to this definition">¶</a></dt>
+<dd><p>completion for commandline</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dbman</strong> (<a class="reference internal" href="database.html#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager</span></tt></a>) &#8211; used to look up avaliable tagstrings</li>
+<li><strong>accountman</strong> (<a class="reference internal" href="accounts.html#alot.account.AccountManager" title="alot.account.AccountManager"><tt class="xref py py-class docutils literal"><span class="pre">AccountManager</span></tt></a>) &#8211; used to look up known addresses to complete &#8216;from&#8217;
+and &#8216;to&#8217; queries</li>
+<li><strong>mode</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; mode identifier</li>
+<li><strong>currentbuffer</strong> (<a class="reference internal" href="#alot.buffers.Buffer" title="alot.buffers.Buffer"><tt class="xref py py-class docutils literal"><span class="pre">Buffer</span></tt></a>) &#8211; currently active buffer. If defined, this will be
+used to dynamically extract possible completion
+strings</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.completion.PathCompleter">
+<em class="property">class </em><tt class="descclassname">alot.completion.</tt><tt class="descname">PathCompleter</tt><a class="headerlink" href="#alot.completion.PathCompleter" title="Permalink to this definition">¶</a></dt>
+<dd><p>completion for paths</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.completion.CryptoKeyCompleter">
+<em class="property">class </em><tt class="descclassname">alot.completion.</tt><tt class="descname">CryptoKeyCompleter</tt><big>(</big><em>private=False</em><big>)</big><a class="headerlink" href="#alot.completion.CryptoKeyCompleter" title="Permalink to this definition">¶</a></dt>
+<dd><p>completion for gnupg key hints</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>private</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; return private keys</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">User Interface</a><ul>
+<li><a class="reference internal" href="#module-alot.ui"><tt class="docutils literal"><span class="pre">UI</span></tt> - the main component</a></li>
+<li><a class="reference internal" href="#buffers">Buffers</a></li>
+<li><a class="reference internal" href="#widgets">Widgets</a></li>
+<li><a class="reference internal" href="#completion">Completion</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="database.html"
+                        title="previous chapter">Email Database</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="settings.html"
+                        title="next chapter">Accessing User Settings</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="settings.html" title="Accessing User Settings"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="database.html" title="Email Database"
+             >previous</a> |</li>
+        <li><a href="index.html">alot v0.2-324-g5224 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011 Patrick Totzke.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

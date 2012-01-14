@@ -1,0 +1,358 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Accessing User Settings &mdash; alot v0.2-324-g5224 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.2-324-g5224',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="alot v0.2-324-g5224 documentation" href="index.html" />
+    <link rel="next" title="Accounts" href="accounts.html" />
+    <link rel="prev" title="User Interface" href="interface.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="accounts.html" title="Accounts"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="interface.html" title="User Interface"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">alot v0.2-324-g5224 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-alot.settings">
+<span id="accessing-user-settings"></span><h1>Accessing User Settings<a class="headerlink" href="#module-alot.settings" title="Permalink to this headline">¶</a></h1>
+<p>There are four types of user settings: notmuchs and alot&#8217;s config
+files, the hooks-file for user provided python code and the mailcap,
+defining shellcomands as handlers for files of certain mime types.</p>
+<p>Alot sets up <a class="reference internal" href="#alot.settings.FallbackConfigParser" title="alot.settings.FallbackConfigParser"><tt class="xref py py-class docutils literal"><span class="pre">FallbackConfigParser</span></tt></a> objects to access the configs
+of alot and notmuch`.
+Hooks can be accessed via <a class="reference internal" href="#alot.settings.AlotConfigParser.get_hook" title="alot.settings.AlotConfigParser.get_hook"><tt class="xref py py-meth docutils literal"><span class="pre">AlotConfigParser.get_hook()</span></tt></a>
+and MIME handlers can be looked up using <a class="reference internal" href="#alot.settings.get_mime_handler" title="alot.settings.get_mime_handler"><tt class="xref py py-func docutils literal"><span class="pre">alot.settings.get_mime_handler()</span></tt></a>.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="43%" />
+<col width="37%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">What</th>
+<th class="head">accessible via</th>
+<th class="head">Type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>alot config</td>
+<td><tt class="xref py py-obj docutils literal"><span class="pre">alot.settings.config</span></tt></td>
+<td><a class="reference internal" href="#alot.settings.AlotConfigParser" title="alot.settings.AlotConfigParser"><tt class="xref py py-class docutils literal"><span class="pre">AlotConfigParser</span></tt></a></td>
+</tr>
+<tr><td>notmuch config</td>
+<td><tt class="xref py py-obj docutils literal"><span class="pre">alot.settings.notmuchconfig</span></tt></td>
+<td><a class="reference internal" href="#alot.settings.FallbackConfigParser" title="alot.settings.FallbackConfigParser"><tt class="xref py py-class docutils literal"><span class="pre">FallbackConfigParser</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+<p>Through these objects you can access user settings (or their default values
+if unset) in the following manner:</p>
+<div class="highlight-python"><pre>from alot.settings import config, notmuchconfig
+
+# alot config
+&gt;&gt;&gt; config.getint('general', 'notify_timeout')
+5
+&gt;&gt;&gt; config.getboolean('general', 'show_statusbar')
+True
+&gt;&gt;&gt; config.getstringlist('general', 'displayed_headers')
+[u'From', u'To', u'Cc', u'Bcc', u'Subject']
+
+# notmuch config
+&gt;&gt;&gt; notmuchconfig.get('user', 'primary_email')
+'patricktotzke@gmail.com'
+&gt;&gt;&gt; notmuchconfig.getboolean('maildir', 'synchronize_flags')
+True</pre>
+</div>
+<p>Hooks can be looked up using <a class="reference internal" href="#alot.settings.AlotConfigParser.get_hook" title="alot.settings.AlotConfigParser.get_hook"><tt class="xref py py-meth docutils literal"><span class="pre">AlotConfigParser.get_hook()</span></tt></a>.
+They are user defined callables that expect to be called with the following parameters:</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">ui:</th><td class="field-body"><a class="reference internal" href="interface.html#alot.ui.UI" title="alot.ui.UI"><tt class="xref py py-class docutils literal"><span class="pre">UI</span></tt></a> &#8211; the initialized main component</td>
+</tr>
+<tr class="field"><th class="field-name">dbm:</th><td class="field-body"><a class="reference internal" href="database.html#alot.db.DBManager" title="alot.db.DBManager"><tt class="xref py py-class docutils literal"><span class="pre">DBManager</span></tt></a> &#8211; <tt class="xref py py-obj docutils literal"><span class="pre">ui.dbman</span></tt></td>
+</tr>
+<tr class="field"><th class="field-name">aman:</th><td class="field-body"><a class="reference internal" href="accounts.html#alot.account.AccountManager" title="alot.account.AccountManager"><tt class="xref py py-class docutils literal"><span class="pre">AccountManager</span></tt></a> &#8211; <tt class="xref py py-obj docutils literal"><span class="pre">ui.accountman</span></tt></td>
+</tr>
+<tr class="field"><th class="field-name">log:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/3.2/library/logging.html#logging.Logger" title="(in Python v3.2)"><tt class="xref py py-class docutils literal"><span class="pre">Logger</span></tt></a> &#8211; <tt class="xref py py-obj docutils literal"><span class="pre">ui.logger</span></tt></td>
+</tr>
+<tr class="field"><th class="field-name">config:</th><td class="field-body"><a class="reference internal" href="#alot.settings.AlotConfigParser" title="alot.settings.AlotConfigParser"><tt class="xref py py-class docutils literal"><span class="pre">AlotConfigParser</span></tt></a> <tt class="xref py py-obj docutils literal"><span class="pre">alot.settings.config</span></tt></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<dl class="class">
+<dt id="alot.settings.FallbackConfigParser">
+<em class="property">class </em><tt class="descclassname">alot.settings.</tt><tt class="descname">FallbackConfigParser</tt><a class="headerlink" href="#alot.settings.FallbackConfigParser" title="Permalink to this definition">¶</a></dt>
+<dd><p><tt class="xref py py-class docutils literal"><span class="pre">SafeConfigParser</span></tt> that allows fallback values</p>
+<dl class="method">
+<dt id="alot.settings.FallbackConfigParser.get">
+<tt class="descname">get</tt><big>(</big><em>section</em>, <em>option</em>, <em>fallback=None</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.settings.FallbackConfigParser.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>get a config option</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>section</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; section name</li>
+<li><strong>option</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; option key</li>
+<li><strong>fallback</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; the value to fall back if option undefined</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.settings.FallbackConfigParser.getstringlist">
+<tt class="descname">getstringlist</tt><big>(</big><em>section</em>, <em>option</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#alot.settings.FallbackConfigParser.getstringlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>directly parses a config value into a list of strings</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="alot.settings.AlotConfigParser">
+<em class="property">class </em><tt class="descclassname">alot.settings.</tt><tt class="descname">AlotConfigParser</tt><a class="headerlink" href="#alot.settings.AlotConfigParser" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#alot.settings.FallbackConfigParser" title="alot.settings.FallbackConfigParser"><tt class="xref py py-class docutils literal"><span class="pre">FallbackConfigParser</span></tt></a> for alots config.</p>
+<dl class="method">
+<dt id="alot.settings.AlotConfigParser.get_hook">
+<tt class="descname">get_hook</tt><big>(</big><em>key</em><big>)</big><a class="headerlink" href="#alot.settings.AlotConfigParser.get_hook" title="Permalink to this definition">¶</a></dt>
+<dd><p>return hook (<cite>callable</cite>) identified by <cite>key</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.settings.AlotConfigParser.get_palette">
+<tt class="descname">get_palette</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.settings.AlotConfigParser.get_palette" title="Permalink to this definition">¶</a></dt>
+<dd><p>parse the sections &#8216;1c-theme&#8217;, &#8216;16c-theme&#8217; and &#8216;256c-theme&#8217;
+into an urwid compatible colour palette.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">a palette</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.settings.AlotConfigParser.has_themeing">
+<tt class="descname">has_themeing</tt><big>(</big><em>themeing</em><big>)</big><a class="headerlink" href="#alot.settings.AlotConfigParser.has_themeing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true if the given themeing option exists in the current colour
+theme.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>themeing</strong> &#8211; The themeing option to check for</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">True if themeing exist, False otherwise</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.settings.AlotConfigParser.get_highlight_rules">
+<tt class="descname">get_highlight_rules</tt><big>(</big><big>)</big><a class="headerlink" href="#alot.settings.AlotConfigParser.get_highlight_rules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse the highlighting rules from the config file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">The highlighting rules</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="http://docs.python.org/3.2/library/collections.html#collections.OrderedDict" title="(in Python v3.2)"><tt class="xref py py-class docutils literal"><span class="pre">collections.OrderedDict</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.settings.AlotConfigParser.get_tag_theme">
+<tt class="descname">get_tag_theme</tt><big>(</big><em>tag</em>, <em>focus=False</em>, <em>highlight=''</em><big>)</big><a class="headerlink" href="#alot.settings.AlotConfigParser.get_tag_theme" title="Permalink to this definition">¶</a></dt>
+<dd><p>look up attribute string to use for a given tagstring</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tag</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; tagstring to look up</li>
+<li><strong>focus</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; return the &#8216;focussed&#8217; attribute</li>
+<li><strong>highlight</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; suffix of highlight theme</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.settings.AlotConfigParser.has_theming">
+<tt class="descname">has_theming</tt><big>(</big><em>themeing</em><big>)</big><a class="headerlink" href="#alot.settings.AlotConfigParser.has_theming" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true if the given themeing option exists in the current colour
+theme.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>themeing</strong> &#8211; The themeing option to check for</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">True if themeing exist, False otherwise</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="alot.settings.AlotConfigParser.get_mapping">
+<tt class="descname">get_mapping</tt><big>(</big><em>mode</em>, <em>key</em><big>)</big><a class="headerlink" href="#alot.settings.AlotConfigParser.get_mapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>look up keybinding from <cite>MODE-maps</cite> sections</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>mode</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; mode identifier</li>
+<li><strong>key</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; urwid-style key identifier</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a command line to be applied upon keypress</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="alot.settings.get_mime_handler">
+<tt class="descclassname">alot.settings.</tt><tt class="descname">get_mime_handler</tt><big>(</big><em>mime_type</em>, <em>key='view'</em>, <em>interactive=True</em><big>)</big><a class="headerlink" href="#alot.settings.get_mime_handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>get shellcomand defined in the users <cite>mailcap</cite> as handler for files of
+given <cite>mime_type</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mime_type</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; file type</li>
+<li><strong>key</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#str" title="(in Python v3.2)"><em>str</em></a>) &#8211; identifies one of possibly many commands for this type by
+naming the intended usage, e.g. &#8216;edit&#8217; or &#8216;view&#8217;. Defaults
+to &#8216;view&#8217;.</li>
+<li><strong>interactive</strong> (<a class="reference external" href="http://docs.python.org/3.2/library/functions.html#bool" title="(in Python v3.2)"><em>bool</em></a>) &#8211; choose the &#8220;interactive session&#8221; handler rather than
+the &#8220;print to stdout and immediately return&#8221; handler</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="interface.html"
+                        title="previous chapter">User Interface</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="accounts.html"
+                        title="next chapter">Accounts</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="accounts.html" title="Accounts"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="interface.html" title="User Interface"
+             >previous</a> |</li>
+        <li><a href="index.html">alot v0.2-324-g5224 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011 Patrick Totzke.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
