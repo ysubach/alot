@@ -13,6 +13,9 @@ attachment_prefix = string(default='~')
 # timeout in (floating point) seconds until partial input is cleared
 input_timeout = float(default=1.0)
 
+# display background colors set by ANSI character escapes
+interpret_ansi_background = boolean(default=True)
+
 # confirm exit
 bug_on_exit = boolean(default=False)
 
